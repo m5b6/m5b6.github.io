@@ -379,6 +379,10 @@ section .row span {
 }
 #about .about-wrapper__image img {
   max-width: 400px;
+  border-radius: 40px;
+  box-shadow: -8px 9px 34px 3px rgba(0,0,0,0.43);
+-webkit-box-shadow: -8px 9px 34px 3px rgba(0,0,0,0.43);
+-moz-box-shadow: -8px 9px 34px 3px rgba(0,0,0,0.43);
   width: 100%;
 }
 @media (max-width: 75em) {
