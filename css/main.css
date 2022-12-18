@@ -411,7 +411,6 @@ section .row span {
 #contact {
   background-image: var(--gradient);
 
-  margin-top: -5rem;
   margin-bottom: -1000px;
   padding-bottom: 0;
   color: #fff;
@@ -425,11 +424,12 @@ section .row span {
 }
 #contact .contact-wrapper {
   margin-top: 3.2rem;
-  padding: 0 0rem;
+  padding-top: 1rem;
   backface-visibility: hidden;
 }
 #contact .contact-wrapper__text {
   margin-bottom: 2.5rem;
+  margin-top: 2.5rem;
 }
 #contact .contact-wrapper__text,
 #contact .contact-wrapper a {
