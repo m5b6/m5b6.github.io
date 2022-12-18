@@ -227,7 +227,7 @@ a{
 }
 .footer__text a:hover,
 .footer__text a:active {
-  color: #36d1dc;
+  color: var(--primary-color)
 }
 .footer hr {
   margin: 1rem auto;
