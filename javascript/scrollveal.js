@@ -9,18 +9,18 @@ const defaultProps = {
 // Hero Section
 ScrollReveal().reveal(".hero-title", {
   ...defaultProps,
-  delay: 500,
+  delay: 100,
   origin: window.innerWidth > 768 ? "left" : "bottom",
 });
 ScrollReveal().reveal(".name", {
   ...defaultProps,
   distance: "0px",
-  delay: 700,
+  delay: 200,
   scale: 0,
 });
 ScrollReveal().reveal(".hero-cta", {
   ...defaultProps,
-  delay: 1200,
+  delay: 300,
   origin: window.innerWidth > 768 ? "left" : "bottom",
 });
 ScrollReveal().reveal(".scroll-down-link", {

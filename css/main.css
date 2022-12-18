@@ -1,12 +1,20 @@
 @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap");
 @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&display=swap');
+
+:root{
+  --gradient : linear-gradient(135deg, #61162e 0%, #782b4d 100%);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Figtree", sans-serif;
+  
 }
+
+
 html {
   font-size: 62.5%;
   scroll-behavior: smooth;
@@ -26,7 +34,7 @@ a {
   text-decoration: none;
 }
 a:hover {
-  transition: all 0.3s ease-in-out;
+  transition: all 0.1s ease-in-out;
 }
 .section-title {
   margin-bottom: 4.5rem;
@@ -47,7 +55,7 @@ a:hover {
 }
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .text-color-main {
-    background-image: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+    background-image: var(--gradient);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -89,7 +97,7 @@ a{
   content: "";
   display: block;
   position: absolute;
-  background-image: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+  background-image: var(--gradient);
   width: 0px;
   height: 100%;
   left: 0;
@@ -108,12 +116,12 @@ a{
   color: #5b87e56e;
   -webkit-text-fill-color: #5b86e5;
   border: 2px solid transparent;
-  border-image: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+  border-image: var(--gradient);
   border-image-slice: 1;
 }
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .cta-btn--hero {
-    background-image: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+    background-image: var(--gradient);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -331,11 +339,11 @@ section .row span {
 }
 #about {
   background-color: #36d1dc;
-  background-image: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+  background-image: var(--gradient);
   color: #fff;
   height: 100%;
-  clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
-  padding-bottom: 10%;
+  clip-path: polygon(0 10%, 100% 0%, 100% 90%, 0% 100%);
+  padding-bottom: 5%;
 }
 @media (max-width: 75em) {
   #about {
@@ -386,7 +394,7 @@ section .row span {
   }
 }
 #contact {
-  background-image: linear-gradient(135deg, #36d1dc 0%, #5b86e5 100%);
+  background-image: var(--gradient);
   clip-path: polygon(0 15vh, 100% 0, 100% 100%, 0 100%);
   padding: 15rem 0 10rem 0;
   margin-top: -15rem;
@@ -629,13 +637,14 @@ section .row span {
 }
 #projects .project-wrapper__image .thumbnail {
   border: none;
-  box-shadow: 8px 8px 9px 7px rgba(174, 174, 192, 0.4), -5px -5px 15px 7px #fff;
+  box-shadow: 8px 8px 9px 7px rgba(0, 0, 0, 0.4);
+  border-radius: 20px;
 }
 #projects .project-wrapper__image .thumbnail .img-fluid {
   width: 100%;
   height: auto;
   vertical-align: middle;
-  border-radius: 2px;
+  border-radius: 20px;
 }
 @media (max-width: 37.5em) {
   #projects .project-wrapper__image .thumbnail {
@@ -669,4 +678,7 @@ section .row span {
 @keyframes blink-caret {
   from, to { border-color: transparent }
   50% { border-color: orange; }
+}
+*::hover{
+  transition: all 0.1s ease-in-out;
 }
