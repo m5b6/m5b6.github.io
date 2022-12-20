@@ -16,6 +16,32 @@
   
 }
 
+.header{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  z-index: 100;
+  text-align: left;
+  font-size: 1em;
+}
+
+button#spanish{
+  background-color: red;
+}
+button#english{
+  background-color: blue;
+}
+
+.sticky {
+  position: fixed;
+  top: 0;
+  width: 100%
+}
+.sticky + .content {
+  padding-top: 102px;
+}
 
 html {
   font-size: 62.5%;
