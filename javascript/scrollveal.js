@@ -85,3 +85,29 @@ function myFunction() {
     header.classList.remove("sticky");
   }
 }
+
+//add event listener to spanish and english and do something
+document.getElementById("spanish").addEventListener("click", function(){
+
+  (document.getElementsByClassName("name")[0].innerHTML="desarrollador & estudiante")
+  document.getElementsByClassName("cta-btn cta-btn--hero")[0].innerHTML="¡ver más!"
+  document.getElementsByClassName("about-title")[0].innerHTML="Sobre mí"
+  document.getElementsByClassName("about-wrapper__info-text")[0].innerHTML = "Como estudiante y desarrollador, me encuentro buscando nuevos desafíos y oportunidades para progresar mis habilidades y conocimientos."
+  document.getElementsByClassName("about-wrapper__info-text")[1].innerHTML = "Siempre busco empujar mis limites. Me veo a mí mismo como una persona con iniciativa que disfruta de colaborar con personas apasionadas por lo que hagan."
+  document.getElementsByClassName("about-wrapper__info-text")[2].innerHTML = "Actualmente estoy estudiando Ingeniería de Software en la <a href='https://dcc.uc.cl/'>Pontificia Universidad Católica de Chile</a>."
+  document.getElementsByClassName("about-wrapper__info-text")[3].innerHTML = "Si tienes alguna pregunta o quieres contactarme, ¡No dudes en <a href='mailto:matiasberrios@uc.cl'>contactarme!</a>"
+  document.getElementsByClassName("cta-btn cta-btn--resume")[0].innerHTML = "Ver CV"
+});
+
+document.getElementById("english").addEventListener("click", function(){
+  
+    (document.getElementsByClassName("name")[0].innerHTML="developer & student")
+    document.getElementsByClassName("cta-btn cta-btn--hero")[0].innerHTML="see more!"
+  document.getElementsByClassName("about-title")[0].innerHTML="About me"
+  document.getElementsByClassName("about-wrapper__info-text")[0].innerHTML = "As a student and developer, I always find myself looking for new challenges and opportunities to leverage my skills and knowledge."
+  document.getElementsByClassName("about-wrapper__info-text")[1].innerHTML = "As a person, I'm strongly dedicated to pushing my limits. I percieve myself as self-starter that also enjoys working with people who are as passionate as I am."
+  document.getElementsByClassName("about-wrapper__info-text")[2].innerHTML = "I am currently studying Software Engineering at <a href='https://dcc.uc.cl/'>PUC Chile</a>."
+  document.getElementsByClassName("about-wrapper__info-text")[3].innerHTML = "If you have any questions or want to get in touch, feel free to <a href='mailto:matiasberrios@uc.cl'>contact me!</a>"
+  document.getElementsByClassName("cta-btn cta-btn--resume")[0].innerHTML = "View Resume"
+
+});
