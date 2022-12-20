@@ -89,6 +89,9 @@ function myFunction() {
 //add event listener to spanish and english and do something
 document.getElementById("spanish").addEventListener("click", function(){
 
+  document.body.style.opacity = 0;
+
+  setTimeout(function(){
   (document.getElementsByClassName("name")[0].innerHTML="desarrollador & estudiante")
   document.getElementsByClassName("cta-btn cta-btn--hero")[0].innerHTML="¡ver más!"
   document.getElementsByClassName("about-title")[0].innerHTML="Sobre mí"
@@ -97,10 +100,18 @@ document.getElementById("spanish").addEventListener("click", function(){
   document.getElementsByClassName("about-wrapper__info-text")[2].innerHTML = "Actualmente estoy estudiando Ingeniería de Software en la <a href='https://dcc.uc.cl/'>Pontificia Universidad Católica de Chile</a>."
   document.getElementsByClassName("about-wrapper__info-text")[3].innerHTML = "Si tienes alguna pregunta o quieres contactarme, ¡No dudes en <a href='mailto:matiasberrios@uc.cl'>contactarme!</a>"
   document.getElementsByClassName("cta-btn cta-btn--resume")[0].innerHTML = "Ver CV"
+
+
+  document.body.style.opacity = 1;
+}, 350);
+
+
 });
 
 document.getElementById("english").addEventListener("click", function(){
+  document.body.style.opacity = 0;
   
+  setTimeout(function(){
     (document.getElementsByClassName("name")[0].innerHTML="developer & student")
     document.getElementsByClassName("cta-btn cta-btn--hero")[0].innerHTML="see more!"
   document.getElementsByClassName("about-title")[0].innerHTML="About me"
@@ -109,5 +120,7 @@ document.getElementById("english").addEventListener("click", function(){
   document.getElementsByClassName("about-wrapper__info-text")[2].innerHTML = "I am currently studying Software Engineering at <a href='https://dcc.uc.cl/'>PUC Chile</a>."
   document.getElementsByClassName("about-wrapper__info-text")[3].innerHTML = "If you have any questions or want to get in touch, feel free to <a href='mailto:matiasberrios@uc.cl'>contact me!</a>"
   document.getElementsByClassName("cta-btn cta-btn--resume")[0].innerHTML = "View Resume"
+  document.body.style.opacity = 1;
+}, 350);
 
 });
