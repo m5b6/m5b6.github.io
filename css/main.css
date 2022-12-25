@@ -7,12 +7,16 @@
   --gradient : linear-gradient(135deg, var(--primary-color) 0%, #a6416d 100%);
 }
 
+@font-face {
+  font-family: "Montreal";
+  src: url("../assets/fonts/SF-Pro.ttf");
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Figtree", sans-serif;
-  
+  font-family: "Montreal";
   
 }
 
@@ -350,6 +354,9 @@ section .row p + p {
 }
 section .row span {
   margin-top: 2rem;
+}
+p{
+  font-weight: 100;
 }
 .container {
   width: 100%;
