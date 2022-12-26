@@ -106,7 +106,7 @@ document.getElementById("spanish").addEventListener("click", function(){
   (document.getElementsByClassName("section-title dark-blue-text"))[0].innerHTML = "Algunos proyectos"
   document.getElementsByClassName("project-wrapper__text-info")[0].innerHTML = "Actualmente contribuyendo a la cuantificación del efecto negativo que puede tener el rolling shutter sobre el sistema Hover-Cal de calibración de telescopios, utilizando visión por computador."
   document.getElementsByClassName("project-wrapper__text-info")[1].innerHTML = "Emulación del evento <a href='https://www.reddit.com/r/place/' style='color: black;'>/r/place</a> de Reddit basada únicamente en Python, orientada a los usuarios de Telegram del Departamento de Ciencias de la Computación de la UC. Recibió más de 2000 interacciones de usuario en su primera hora!" 
-  
+  document.getElementsByClassName("project-wrapper__text-info")[2].innerHTML = "Visualización de datos recolectados por mi dispositivo Garmin durante sesiones entrenamiento físico personal. ¡Selecciona un grupo muscular para ver cuánto lo he entrenado!"
   document.body.style.opacity = 1;
 }, 350);
 
@@ -136,7 +136,7 @@ document.getElementById("english").addEventListener("click", function(){
   (document.getElementsByClassName("section-title dark-blue-text"))[0].innerHTML = "Some projects"
   document.getElementsByClassName("project-wrapper__text-info")[0].innerHTML = "Currently contributing to a computer vision oriented project that aims to quantify the negative effect of rolling shutter on PUC's drone-based telescope calibration system."
   document.getElementsByClassName("project-wrapper__text-info")[1].innerHTML = "Python-based, near identical emulation of Reddit’s <a href='https://www.reddit.com/r/place/' style='color: black;'>/r/place event</a> , achieved through Telegram user interactions with the 'DCCPlace' bot, aimed towards PUC’s CS Student community. Handled almost 2000 user interactions within 1 hour of public release!"
-
+  document.getElementsByClassName("project-wrapper__text-info")[2].innerHTML = "A web-based data viz that allows an interactive analysis of training data collected by my personal Garmin device during weight training sessions. Select a body part and see how much I've trained it!"
 
   document.body.style.opacity = 1;
 }, 350);
