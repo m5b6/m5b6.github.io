@@ -43,6 +43,14 @@ input#spanish, input#english{
   transition: all 0.2s ease-in;
 }
 
+input#english:hover, input#spanish:hover{
+  transform: scale(1.1);
+}
+
+input#english{
+  opacity: 0.3;
+}
+
 
 
 
