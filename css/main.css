@@ -3,13 +3,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=M+PLUS+Rounded+1c:wght@100;300;400;500;700;800;900&display=swap');
 
 :root{
-  --primary-color: #61162e;
-  --gradient : linear-gradient(135deg, var(--primary-color) 0%, #a6416d 100%);
+  --primary-color: #61102a;
+  --secondary-color: #ca623d;
+  --gradient : linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
 }
 
 @font-face {
   font-family: "Montreal";
-  src: url("../assets/fonts/SF-Pro.ttf");
+  src: url("../assets/fonts/SF-Pro-Display-Medium.otf");
 }
 
 * {
@@ -672,7 +673,7 @@ p{
 #projects .project-wrapper__text-title {
   font-weight: bold;
   margin-bottom: 1.8rem;
-  font-size: 2.5rem;
+  font-size: 3.5rem;
 }
 @media (max-width: 37.5em) {
   #projects .project-wrapper__text-title {
