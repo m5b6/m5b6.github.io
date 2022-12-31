@@ -87,7 +87,9 @@ function myFunction() {
 }
 
 //to spanish
-
+//to spanish
+//to spanish
+//to spanish
 document.getElementById("spanish").addEventListener("click", function(){
   let spanish  = document.getElementById("spanish") 
   let english  = document.getElementById("english")
@@ -95,7 +97,7 @@ document.getElementById("spanish").addEventListener("click", function(){
   english.style.opacity = 1
   spanish.style.opacity = 0.3
   setTimeout(function(){
-  (document.getElementsByClassName("name")[0].innerHTML="desarrollador & estudiante")
+  (document.getElementsByClassName("name")[0].innerHTML="dev & estudiante")
   document.getElementsByClassName("cta-btn cta-btn--hero")[0].innerHTML="ver más"
   document.getElementsByClassName("about-title")[0].innerHTML="Sobre mí"
   document.getElementsByClassName("about-wrapper__info-text")[0].innerHTML = "Como estudiante y desarrollador, me encuentro buscando nuevos desafíos y oportunidades para progresar mis habilidades y conocimientos."
@@ -107,25 +109,25 @@ document.getElementById("spanish").addEventListener("click", function(){
   document.getElementsByClassName("project-wrapper__text-info")[0].innerHTML = "Actualmente contribuyendo a la cuantificación del efecto negativo que puede tener el rolling shutter sobre el sistema Hover-Cal de calibración de telescopios, utilizando visión por computador."
   document.getElementsByClassName("project-wrapper__text-info")[1].innerHTML = "Emulación del evento <a href='https://www.reddit.com/r/place/' style='color: black;'>/r/place</a> de Reddit basada únicamente en Python, orientada a los usuarios de Telegram del Departamento de Ciencias de la Computación de la UC. Recibió más de 2000 interacciones de usuario en su primera hora!" 
   document.getElementsByClassName("project-wrapper__text-info")[2].innerHTML = "Visualización de datos recolectados por mi dispositivo Garmin durante sesiones entrenamiento físico personal. ¡Selecciona un grupo muscular para ver cuánto lo he entrenado!"
+  document.getElementsByClassName("contact-wrapper__text")[0].innerHTML = "Si buscas contactarme, envíame un correo"
   document.body.style.opacity = 1;
 }, 350);
-
-
 });
 
-//to english
 
+//to english
+//to english
+//to english
+//to english
+//to english
 document.getElementById("english").addEventListener("click", function(){
   document.body.style.opacity = 0;
-
   let english  = document.getElementById("english")
   let spanish  = document.getElementById("spanish")
   spanish.style.opacity = 1
   english.style.opacity = 0.3
-
-  
   setTimeout(function(){
-    (document.getElementsByClassName("name")[0].innerHTML="developer & student")
+    (document.getElementsByClassName("name")[0].innerHTML="dev & student")
     document.getElementsByClassName("cta-btn cta-btn--hero")[0].innerHTML="see more!"
   document.getElementsByClassName("about-title")[0].innerHTML="About me"
   document.getElementsByClassName("about-wrapper__info-text")[0].innerHTML = "As a student and developer, I always find myself looking for new challenges and opportunities to leverage my skills and knowledge."
@@ -137,7 +139,7 @@ document.getElementById("english").addEventListener("click", function(){
   document.getElementsByClassName("project-wrapper__text-info")[0].innerHTML = "Currently contributing to a computer vision oriented project that aims to quantify the negative effect of rolling shutter on PUC's drone-based telescope calibration system."
   document.getElementsByClassName("project-wrapper__text-info")[1].innerHTML = "Python-based, near identical emulation of Reddit’s <a href='https://www.reddit.com/r/place/' style='color: black;'>/r/place event</a> , achieved through Telegram user interactions with the 'DCCPlace' bot, aimed towards PUC’s CS Student community. Handled almost 2000 user interactions within 1 hour of public release!"
   document.getElementsByClassName("project-wrapper__text-info")[2].innerHTML = "A web-based data viz that allows an interactive analysis of training data collected by my personal Garmin device during weight training sessions. Select a body part and see how much I've trained it!"
-
+  document.getElementsByClassName("contact-wrapper__text")[0].innerHTML = "Got a question? Looking to collaborate? Just want to talk?"
   document.body.style.opacity = 1;
 }, 350);
 
