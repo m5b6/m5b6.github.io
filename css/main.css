@@ -36,6 +36,14 @@ body{
   font-size: 1em;
 }
 
+.cta-btn--header {
+  border-radius: 20px;
+  text-decoration: none;
+  color: rgb(0, 0, 0);
+  border: 2px dotted rgb(0, 0, 0);
+  align-self: flex-end;
+}
+
 input#spanish, input#english{
   height: 4rem;
   width: 4rem;
@@ -131,7 +139,7 @@ a{
   line-height: 1;
   z-index: 1;
   overflow: hidden;
-  border-radius: 3px;
+  border-radius: 20px;
   transition: all cubic-bezier(0.19, 1, 0.22, 1) 0.6s;
 }
 .cta-btn:hover {
@@ -164,9 +172,9 @@ a{
 .cta-btn--hero {
   color: #5b87e56e;
   -webkit-text-fill-color: var(--primary-color);
-  border: 2px solid transparent;
-  border-image: var(--gradient);
-  border-image-slice: 1;
+  border: 3px solid transparent;
+  border-color: var(--primary-color);
+  border-radius: 20px;
 }
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .cta-btn--hero {
@@ -175,6 +183,7 @@ a{
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
+    border-radius: 18px;
   }
 }
 @media screen and (-ms-high-contrast: active),
@@ -190,6 +199,7 @@ a{
   .cta-btn--hero {
     background-image: none;
     border: 2px solid var(--primary-color);
+    border-radius: 20px;
     box-shadow: none;
     -webkit-text-fill-color: var(--primary-color);
   }
@@ -212,7 +222,8 @@ a{
   transform: translate(-9%, -25%) rotate(45deg);
 }
 .cta-btn--resume {
-  border-radius: 0;
+  border-radius: 20px;
+  text-decoration: none;
   color: #fff;
   border: 2px solid #fff;
 }
@@ -551,6 +562,7 @@ p{
 }
 #hero .hero-cta {
   display: flex;
+  border-radius: 20px;
 }
 @media (max-width: 56.25em) {
   #hero .hero-cta {
@@ -570,31 +582,6 @@ p{
   left: 50%;
   bottom: 20px;
   transform: translateX(-50%);
-}
-.scroll-down {
-  height: 50px;
-  width: 30px;
-  border: 2px solid #000000;
-  border-radius: 50px;
-  cursor: pointer;
-}
-.scroll-down::before,
-.scroll-down::after {
-  height: 10px;
-  width: 10px;
-  content: "";
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  border: 2px solid var(--primary-color);
-  transform: translate(-50%, -100%) rotate(45deg);
-  border-top: none;
-  border-left: none;
-  animation: scroll-down 1s ease-in-out infinite;
-}
-.scroll-down::after {
-  top: 30%;
-  animation-delay: 0.3s;
 }
 @keyframes hidden {
   0% {

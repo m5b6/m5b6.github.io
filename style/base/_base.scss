@@ -4,6 +4,12 @@
   box-sizing: border-box;
   font-family: $font-family;
 }
+
+@font-face {
+  font-family: "Montreal";
+  src: url("../assets/fonts/SF-Pro-Display-Medium.otf");
+}
+
 html {
   font-size: 62.5%;
   scroll-behavior: smooth;
