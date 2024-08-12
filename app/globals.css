@@ -10,13 +10,13 @@
 * {
   background-color: #000000;
   color: #fff;
-  font-family: "Mona Sans", monospace;
+  font-family: "Mona Sans";
   font-stretch: 200%;
 }
 
-h1{
-    font-size: 5rem;
-    font-weight: 800;
+h1 {
+  font-size: 5rem;
+  font-weight: 800;
 }
 
 body {

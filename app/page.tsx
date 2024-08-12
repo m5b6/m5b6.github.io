@@ -1,5 +1,3 @@
-"use client";
-
 export default function Home() {
   return (
     <main>
@@ -21,10 +19,8 @@ export default function Home() {
         <p>
           engineer from Chile, currently interested in building software or
           applying AI to solve problems in healthcare.
-
           <br />
           <br />
-
         </p>
       </div>
     </main>
