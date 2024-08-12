@@ -1,46 +1,59 @@
-@import url('https://fonts.googleapis.com/css2?family=Anonymous+Pro&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
-*{
-    background-color: #000000;
-    color: #fff;
-    font-family: 'Open Sans', monospace;
+@font-face {
+  font-family: "Mona Sans";
+  src: url("../public/MonaSansVF-Regular.woff2")
+      format("woff2 supports variations"),
+    url("../public/MonaSansVF-Regular.woff2") format("woff2-variations");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
 }
 
-body{
-    scroll-behavior: smooth;
-    margin: 0 !important;
+* {
+  background-color: #000000;
+  color: #fff;
+  font-family: "Mona Sans", monospace;
+  font-stretch: 200%;
 }
 
-main{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    width: 100vw !important;
+h1{
+    font-size: 5rem;
+    font-weight: 800;
 }
 
-div.column{
-    display: flex;
-    justify-content: start;
-    align-items: start;
-    flex-direction: column;
-    max-width: 800px;
-    padding: 20px;
+body {
+  scroll-behavior: smooth;
+  margin: 0 !important;
 }
 
-div.links{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: row;
-    gap: 10px;
+main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100vw !important;
 }
 
+div.column {
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  flex-direction: column;
+  max-width: 800px;
+  padding: 20px;
+}
 
-small{
-    font-size: 0.8rem;
-    color: #ccc;
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    text-align: right;
+div.links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  gap: 10px;
+}
+
+small {
+  font-size: 0.8rem;
+  color: #ccc;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  text-align: right;
 }

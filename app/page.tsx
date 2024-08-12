@@ -1,16 +1,10 @@
 "use client";
 
-import NotionParser from "./notion";
 export default function Home() {
-  const elements = NotionParser.ParseNotion();
   return (
     <main>
       <div className="column">
-        <h1>m5b6</h1>
-        <small>
-          last updated: {NotionParser.lastUpdated}
-        </small>
-
+        <h1>matias berrios, m5b6</h1>
         <div className="links">
           <a target="_blank" href="https://twitter.com/matiasberrioss">
             twitter
@@ -25,14 +19,13 @@ export default function Home() {
           </a>
         </div>
         <p>
-          engineer & researcher from Chile, with an interest in healthcare
-          applied AI. 
-          <br></br>
-          these are my notes on various topics, related and unrelated to my work.
+          engineer from Chile, currently interested in building software or
+          applying AI to solve problems in healthcare.
+
+          <br />
+          <br />
+
         </p>
-
-
-        {elements}
       </div>
     </main>
   );
