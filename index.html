@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" class="light-mode">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>m5b6</title>
+    <meta name="description" content="m5b6, an engineer based in Chile." />
+    <meta name="author" content="Matias Berrios" />
+    <meta
+      name="keywords"
+      content="Matias Berrios, engineer, Chile, Fintoc, startup, m5b6"
+    />
+
+    <meta property="og:title" content="m5b6" />
+
+    <link rel="icon" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <style>
+      :root {
+        --bg-color: white;
+        --text-color: black;
+        --selection-bg: #164d00;
+        --selection-text: white;
+      }
+
+      .dark-mode {
+        --bg-color: black;
+        --text-color: white;
+        --selection-bg: rgb(24, 237, 9);
+        --selection-text: black;
+      }
+
+      @font-face {
+        font-family: "redaction";
+        src: url(helvetica.ttf);
+      }
+      @font-face {
+        font-family: "toren";
+        src: url(redaction50-regular.woff);
+      }
+      body {
+        font-family: "redaction", sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 2em;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      .dark-mode body {
+        font-family: "toren", monospace;
+      }
+
+      ::selection {
+        background-color: var(--selection-bg);
+        color: var(--selection-text);
+      }
+
+      .column {
+        display: flex;
+        flex-direction: column;
+      }
+
+      ol {
+        padding-left: 0px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 2em;
+        margin-bottom: 1rem;
+        cursor: help;
+      }
+
+      .links {
+        margin: 10px 0;
+      }
+
+      a {
+        color: var(--text-color);
+      }
+
+      li {
+        list-style: none;
+        margin-bottom: 0.5rem;
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 20px;
+        }
+
+        main {
+          width: 100%;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 10px;
+        }
+      }
+
+      .time-date {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 0.8em;
+      }
+
+      #mode-switch {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: none;
+        border: 1px solid var(--text-color);
+        color: var(--text-color);
+        cursor: pointer;
+        font-family: "toren", monospace;
+        font-size: 1.5em;
+        width: 1.5em;
+        height: 1.5em;
+      }
+
+      #mode-switch:hover {
+        background-color: var(--text-color);
+        color: var(--bg-color);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div
+      id="time-date"
+      class="time-date"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+    <button id="mode-switch" aria-label="Toggle dark mode">☽</button>
+    <main>
+      <div class="column">
+        <h1>matias berrios, m5b6</h1>
+        <nav class="links" aria-label="Main navigation">
+          [<a
+            target="_blank"
+            href="https://linkedin.com/in/matiasberrios"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn profile"
+            >linkedin</a
+          >] │ [<a
+            target="_blank"
+            href="https://github.com/m5b6"
+            rel="noopener noreferrer"
+            aria-label="GitHub profile"
+            >github</a
+          >] │ [<a
+            target="_blank"
+            href="mailto:m5b6@proton.me"
+            aria-label="Email contact"
+            >mail</a
+          >]
+        </nav>
+        <ol aria-label="About me">
+          <li>☞ engineer based in Chile</li>
+          <li>
+            ☞ currently @
+            <a
+              href="https://www.fintoc.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              >fintoc</a
+            >
+          </li>
+          <li>☞ building a startup in stealth mode</li>
+        </ol>
+      </div>
+    </main>
+
+    <script>
+      function updateTimeDate() {
+        const timeDateElement = document.getElementById("time-date");
+        const currentDateTime = new Date();
+
+        const timeOptions = {
+          hour12: false,
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          fractionalSecondDigits: 1,
+        };
+
+        const dateOptions = {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        };
+
+        const formattedTime = currentDateTime.toLocaleString(
+          "default",
+          timeOptions
+        );
+        const formattedDate = currentDateTime.toLocaleString(
+          "default",
+          dateOptions
+        );
+
+        timeDateElement.textContent = `${formattedDate.replace(
+          /\//g,
+          "/"
+        )} ${formattedTime}`;
+      }
+
+      function toggleMode() {
+        document.documentElement.classList.toggle("dark-mode");
+        const modeSwitch = document.getElementById("mode-switch");
+        const isDarkMode =
+          document.documentElement.classList.contains("dark-mode");
+        modeSwitch.textContent = isDarkMode ? "☀" : "☽";
+        modeSwitch.setAttribute(
+          "aria-label",
+          isDarkMode ? "Switch to light mode" : "Switch to dark mode"
+        );
+      }
+
+      setInterval(updateTimeDate, 10);
+
+      document
+        .getElementById("mode-switch")
+        .addEventListener("click", toggleMode);
+    </script>
+  </body>
+</html>
