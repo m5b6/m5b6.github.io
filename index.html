@@ -46,14 +46,14 @@
       body {
         font-family: "redaction", sans-serif;
         margin: 0;
-        padding: 0;
+        padding: 20px;
         display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+        flex-direction: column;
+        justify-content: flex-start;
+        min-height: 100vh;
         background-color: var(--bg-color);
         color: var(--text-color);
-        font-size: 2em;
+        font-size: 16px;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
@@ -96,31 +96,15 @@
         margin-bottom: 0.5rem;
       }
 
-      @media (max-width: 768px) {
-        body {
-          padding: 20px;
-        }
-
-        main {
-          width: 100%;
-        }
-      }
-
-      @media (max-width: 480px) {
-        body {
-          padding: 10px;
-        }
-      }
-
       .time-date {
-        position: absolute;
+        position: fixed;
         top: 10px;
         left: 10px;
         font-size: 0.8em;
       }
 
       #mode-switch {
-        position: absolute;
+        position: fixed;
         top: 10px;
         right: 10px;
         background: none;
@@ -131,11 +115,32 @@
         font-size: 1.5em;
         width: 1.5em;
         height: 1.5em;
+        z-index: 1000;
       }
 
       #mode-switch:hover {
         background-color: var(--text-color);
         color: var(--bg-color);
+      }
+
+      main {
+        margin-top: 60px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      @media (min-width: 768px) {
+        body {
+          font-size: 24px;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        body {
+          font-size: 32px;
+        }
       }
     </style>
   </head>
