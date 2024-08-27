@@ -6,7 +6,7 @@
 }
 
 .blur {
-  backdrop-filter: brightness(0.9) blur(1px);
+  backdrop-filter: brightness(0.85) blur(2px);
 }
 #blur-overlay {
   position: fixed;
@@ -19,7 +19,7 @@
   justify-content: center;
   pointer-events: none;
   align-items: center;
-  transition: backdrop-filter 0.25s;
+  transition: backdrop-filter 0.2s;
 }
 html,
 body {
@@ -36,11 +36,11 @@ body {
 
 @font-face {
   font-family: "helvetica";
-  src: url(helvetica.ttf);
+  src: url(./assets/helvetica.ttf);
 }
 @font-face {
-  font-family: "toren";
-  src: url(space.woff);
+  font-family: "terminal";
+  src: url(./assets/terminal.woff2);
 }
 
 * {
@@ -62,11 +62,11 @@ body {
 }
 
 .dark-mode body {
-  font-family: "toren", monospace;
+  font-family: "terminal", monospace;
 }
 
 .dark-mode * {
-  font-family: "toren", monospace;
+  font-family: "terminal", monospace;
 }
 
 ::selection {
@@ -121,7 +121,7 @@ li {
   border: 1px solid var(--text-color);
   color: var(--text-color);
   cursor: pointer;
-  font-family: "toren", monospace;
+  font-family: "terminal", monospace;
   font-size: 1.2em;
   width: 1.5em;
   height: 1.5em;
@@ -186,6 +186,7 @@ li {
   padding: 10px;
   z-index: 99;
   height: fit-content;
+  transition: opacity 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), scale 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .dragging {
@@ -215,7 +216,9 @@ li {
 }
 
 .comment-box.hidden {
-  display: none;
+  opacity: 0;
+  scale: 0.95;
+  pointer-events: none;
 }
 
 #comments-list {
@@ -300,6 +303,7 @@ p {
 h2.comments-header {
   margin-top: 0;
   font-size: 1em;
+  margin-bottom: 10px;
 }
 
 div.comment {
@@ -307,4 +311,15 @@ div.comment {
   max-width: 100%;
   word-wrap: break-word;
   display: flex;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }

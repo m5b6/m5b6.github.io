@@ -5,16 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>m5b6</title>
-    <meta name="description" content="m5b6, an engineer based in Chile." />
+    <meta name="description" content="Matias Berrios (m5b6) is an engineer based in Chile, currently working at Fintoc and building a stealth mode startup." />
     <meta name="author" content="Matias Berrios" />
-    <meta
-      name="keywords"
-      content="Matias Berrios, engineer, Chile, Fintoc, startup, m5b6"
-    />
+    <meta name="keywords" content="Matias Berrios, m5b6, engineer, Chile, Fintoc, startup, technology, innovation" />
 
-    <meta property="og:title" content="m5b6" />
+    <meta property="og:title" content="Matias Berrios (m5b6) - Engineer" />
+    <meta property="og:description" content="Homepage to Matias Berrios (m5b6), engineer from Chile." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.matiasberrios.com" />
+    <meta property="og:image" content="https://www.example.com/og-image.jpg" />
 
-    <link rel="icon" href="/favicon.svg" />
+    <link rel="canonical" href="https://www.example.com" />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -22,40 +24,65 @@
     <link rel="stylesheet" href="/styles.css" />
 
     <script src="./scripts.js" defer></script>
+    <script type="application/ld+json">
+      {
+        "@context": "http://schema.org",
+        "@type": "Person",
+        "name": "Matias Berrios",
+        "alternateName": "m5b6",
+        "jobTitle": "Engineer",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Fintoc"
+        },
+        "url": "https://www.example.com",
+        "sameAs": [
+          "https://linkedin.com/in/matiasberrios",
+          "https://github.com/m5b6"
+        ]
+      }
+    </script>
   </head>
 
   <body>
-    <div id="blur-overlay">&nbsp;</div>
+    <div id="blur-overlay" aria-hidden="true">&nbsp;</div>
     <div
       id="time-date"
       class="time-date"
       aria-live="polite"
       aria-atomic="true"
     ></div>
-    <button id="mode-switch" aria-label="Toggle dark mode">☽</button>
+    <button id="mode-switch" aria-label="Toggle dark mode">
+      <span aria-hidden="true">☽</span>
+    </button>
     <main>
       <div class="column">
-        <h1>matias berrios, m5b6</h1>
+        <h1>Matias Berrios, m5b6</h1>
         <nav class="links" aria-label="Main navigation">{<a
-            target="_blank"
-            href="https://linkedin.com/in/matiasberrios"
+          target="_blank"
+          href="https://linkedin.com/in/matiasberrios"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn profile"
+          >linkedin</a
+        >}―{<a
+          target="_blank"
+          href="https://github.com/m5b6"
+          rel="noopener noreferrer"
+          aria-label="GitHub profile"
+          >github</a
+        >}―{<a
+          target="_blank"
+          href="mailto:m5b6@proton.me"
+          aria-label="Email contact"
+          >mail</a
+        >}―{<a
+            href="/other.html"
             rel="noopener noreferrer"
-            aria-label="LinkedIn profile"
-            >linkedin</a
-          >}―{<a
-            target="_blank"
-            href="https://github.com/m5b6"
-            rel="noopener noreferrer"
-            aria-label="GitHub profile"
-            >github</a
-          >}―{<a
-            target="_blank"
-            href="mailto:m5b6@proton.me"
-            aria-label="Email contact"
-            >mail</a
+            aria-label="Other page"
+            >other</a
           >}
-        </nav>
-        <ol aria-label="About me">
+      </nav>
+        <ol aria-label="About Matias Berrios">
           <li>☞ engineer based in Chile</li>
           <li>
             ☞ currently @
@@ -70,18 +97,25 @@
         </ol>
       </div>
     </main>
-    <div id="comment-toggle" class="comment-toggle">✐</div>
-    <div id="comment-box" class="comment-box hidden">
-      <div class="comment-box-close" id="comment-close">☓</div>
-      <h2 class="comments-header">Comments ☺</h2>
-      <div id="comments-list"></div>
-      <form id="comment-form">
+    <div id="comment-toggle" class="comment-toggle" aria-label="Toggle comment section" tabindex="0" role="button">
+      <span aria-hidden="true">✐</span>
+    </div>
+    <div id="comment-box" class="comment-box hidden" aria-label="Comment section">
+      <div class="comment-box-close" id="comment-close" aria-label="Close comment section" tabindex="0" role="button">
+        <span aria-hidden="true">☓</span>
+      </div>
+      <h2 class="comments-header">Comments <span aria-hidden="true">☺</span></h2>
+      <div id="comments-list" aria-live="polite"></div>
+      <form id="comment-form" aria-label="Comment form">
+        <label for="commenter-name" class="visually-hidden">Name (optional)</label>
         <input
           type="text"
           id="commenter-name"
           placeholder="웃 name (optional)"
-          maxlength="50"
+          maxlength="20"
+          aria-label="Enter your name (optional)"
         />
+        <label for="comment-text" class="visually-hidden">Comment</label>
         <textarea
           id="comment-text"
           placeholder="✐ say something nice..."
@@ -89,17 +123,19 @@
           rows="10"
           minlength="1"
           maxlength="100"
-          pattern="^[a-zA-Z0-9@.,!?'&quot; ]*$"
+          pattern="^[a-zA-Z0-9@.,!?\'\" ]*$"
           oninput="this.value = this.value.replace(/[\r\n\v]+/g, '')"
+          aria-label="Enter your comment"
         ></textarea>
-        <button type="submit" id="submit-button">
-          <p>&nbsp;</p>
+        <button type="submit" id="submit-button" aria-label="Send comment">
+          <p aria-hidden="true">&nbsp;</p>
           <p>Send</p>
-
-          <div id="loading-spinner" class="loading-spinner hidden">
-              <img 
+          <div id="loading-spinner" class="loading-spinner hidden" aria-hidden="true">
+            <img 
               class="spinner"
-              src="./loading.png"></div>
+              src="./assets/loading.png"
+              alt="Loading spinner"
+            />
           </div>
         </button>
       </form>
