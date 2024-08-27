@@ -1,0 +1,271 @@
+:root {
+  --bg-color: white;
+  --text-color: black;
+  --selection-bg: #ff0000;
+  --selection-text: white;
+}
+
+.blur {
+  backdrop-filter: brightness(0.9) blur(1px);
+}
+#blur-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  align-items: center;
+  transition: backdrop-filter 0.25s;
+}
+html,
+body {
+  height: 100%;
+  overflow: hidden !important;
+}
+
+.dark-mode {
+  --bg-color: black;
+  --text-color: white;
+  --selection-bg: rgb(24, 237, 9);
+  --selection-text: black;
+}
+
+@font-face {
+  font-family: "helvetica";
+  src: url(helvetica.ttf);
+}
+@font-face {
+  font-family: "toren";
+  src: url(space.woff);
+}
+
+* {
+  font-family: "helvetica", sans-serif;
+}
+body {
+  font-family: "helvetica", sans-serif;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-size: 1.3em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark-mode body {
+  font-family: "toren", monospace;
+}
+
+.dark-mode * {
+  font-family: "toren", monospace;
+}
+
+::selection {
+  background-color: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  max-width: 100%;
+}
+
+ol {
+  padding-left: 0;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5em;
+  margin-bottom: 1rem;
+  cursor: help;
+}
+
+.links {
+  margin: 10px 0;
+  font-size: 0.9em;
+}
+
+a {
+  color: var(--text-color);
+}
+
+li {
+  list-style: none;
+  margin-bottom: 0.5rem;
+  font-size: 0.9em;
+}
+
+.time-date {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 0.7em;
+}
+
+#mode-switch {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-family: "toren", monospace;
+  font-size: 1.2em;
+  width: 1.5em;
+  height: 1.5em;
+  padding: 0;
+  z-index: 99;
+}
+
+#mode-switch:hover {
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  z-index: 99;
+}
+
+@media (min-width: 768px) {
+  body {
+    font-size: 24px;
+  }
+
+  h1 {
+    font-size: 2em;
+  }
+
+  .links,
+  li {
+    font-size: 1em;
+  }
+
+  .time-date {
+    font-size: 0.8em;
+  }
+
+  #mode-switch {
+    font-size: 1.5em;
+  }
+}
+
+.comment-toggle {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background: var(--bg-color);
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 1.2em;
+  width: 1.5em;
+  height: 1.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99;
+}
+
+.comment-box {
+  position: absolute;
+  cursor: grab;
+  bottom: 2.5em;
+  left: 10px;
+  width: 300px;
+  background: var(--bg-color);
+  border: 1px solid var(--text-color);
+  padding: 10px;
+  z-index: 99;
+  height: fit-content
+}
+
+
+
+.dragging {
+  cursor: grabbing !important;
+}
+
+.datetime-container {
+  display: flex !important;
+  width: fit-content;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.65em;
+}
+.datetime-bracket {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.comment-box-close {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.comment-box.hidden {
+  display: none;
+}
+
+#comments-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  max-width: 100%;
+  overflow-x: hidden;
+  padding: 10px;
+  border: 1px solid var(--text-color);
+}
+
+#comment-form {
+  display: flex;
+  flex-direction: column;
+}
+
+#comment-text {
+  resize: vertical;
+  min-height: 5em;
+  max-height: 20em;
+}
+
+#comment-form input,
+#comment-form textarea {
+  margin-bottom: 10px;
+  padding: 5px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--text-color);
+}
+
+#comment-form button {
+  background: var(--text-color);
+  color: var(--bg-color);
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+}
+
+h2.comments-header {
+  margin-top: 0;
+  font-size: 1em;
+}
+
+div.comment {
+  font-size: 0.5em;
+  max-width: 100%;
+  word-wrap: break-word;
+  display: flex;
+}
