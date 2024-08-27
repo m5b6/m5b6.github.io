@@ -45,7 +45,7 @@ document.getElementById("mode-switch").addEventListener("click", toggleMode);
 ///////////////////////* COMMENTS *////////////////////////
 ///////////////////////* COMMENTS *////////////////////////
 
-const API_URL = "http://comments.matiasberrios.com"
+const API_URL = "https://comments.matiasberrios.com"
 
 function toggleCommentBox() {
   const commentBox = document.getElementById("comment-box");
