@@ -45,7 +45,7 @@ document.getElementById("mode-switch").addEventListener("click", toggleMode);
 ///////////////////////* COMMENTS *////////////////////////
 ///////////////////////* COMMENTS *////////////////////////
 
-const API_URL = "http://35.174.112.111:8080";
+const API_URL = "http://comments.matiasberrios.com"
 
 function toggleCommentBox() {
   const commentBox = document.getElementById("comment-box");
@@ -69,8 +69,14 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
+function sanitizeHTML(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 function fetchComments() {
-  fetch(`${API_URL}/comments`)
+  return fetch(`${API_URL}`)
     .then((response) => response.json())
     .then((comments) => {
       const commentsList = document.getElementById("comments-list");
@@ -78,7 +84,12 @@ function fetchComments() {
       comments.forEach((comment) => {
         const commentElement = document.createElement("div");
         commentElement.classList.add("comment");
-        commentElement.innerHTML = `<b>[${comment.time}] ${comment.alias}</b>: ${comment.content}`;
+
+        const sanitizedTime = sanitizeHTML(comment.time);
+        const sanitizedAlias = sanitizeHTML(comment.alias || "Anonymous");
+        const sanitizedContent = sanitizeHTML(comment.content);
+
+        commentElement.innerHTML = `<b>[${sanitizedTime}] ${sanitizedAlias}</b>: ${sanitizedContent}`;
         commentsList.appendChild(commentElement);
       });
     })
@@ -87,22 +98,45 @@ function fetchComments() {
 
 function submitComment(event) {
   event.preventDefault();
-  const name = document.getElementById("commenter-name").value;
+  const name = document.getElementById("commenter-name").value || "Anonymous";
   const comment = document.getElementById("comment-text").value;
+  const submitButton = document.getElementById("submit-button");
+  const loadingSpinner = document.getElementById("loading-spinner");
+  const nameInput = document.getElementById("commenter-name");
+  const textInput = document.getElementById("comment-text");
 
-  fetch(`${API_URL}/comments?alias=${encodeURIComponent(name)}`, {
+  loadingSpinner.classList.remove("hidden");
+  submitButton.disabled = true;
+  nameInput.disabled = true;
+  textInput.disabled = true;
+
+  fetch(`${API_URL}/new?alias=${encodeURIComponent(name)}`, {
     method: "POST",
+    headers: {
+      "Content-Type": "text/plain",
+    },
     body: comment,
   })
     .then((response) => {
       if (response.ok) {
-        document.getElementById("comment-form").reset();
-        fetchComments();
+        return fetchComments();
       } else {
         console.error("Failed to submit comment");
+        throw new Error("Failed to submit comment");
       }
     })
-    .catch((error) => console.error("Error submitting comment:", error));
+    .catch((error) => console.error("Error submitting comment:", error))
+    .finally(() => {
+      fetchComments().finally(() => {
+        submitButton.disabled = false;
+        document.getElementById("comment-form").reset();
+        nameInput.disabled = false;
+        textInput.disabled = false;
+        loadingSpinner.classList.add("hidden");
+        const list = document.getElementById("comments-list");
+        list.scroll({ top: list.scrollHeight });
+      });
+    });
 }
 
 document
@@ -144,15 +178,20 @@ function dragElement(elmnt) {
     e.preventDefault();
 
     // Check if the target element is an input, button, or textarea
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+      e.target.focus();
+      return;
+    }
+    if (e.target.tagName === "BUTTON") {
+      return;
+    }
+
     if (
-      e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA"){
-        e.target.focus();
-      }
-    if (
-      e.target.tagName === "BUTTON")
-      {
-        e.target.click();
-      }
+      e.target.id === "comments-list" ||
+      e.target.classList.contains("comment")
+    ) {
+      return;
+    }
 
     pos3 = e.clientX;
     elmnt.classList.toggle("dragging");

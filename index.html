@@ -36,25 +36,24 @@
     <main>
       <div class="column">
         <h1>matias berrios, m5b6</h1>
-        <nav class="links" aria-label="Main navigation">
-          [<a
+        <nav class="links" aria-label="Main navigation">{<a
             target="_blank"
             href="https://linkedin.com/in/matiasberrios"
             rel="noopener noreferrer"
             aria-label="LinkedIn profile"
             >linkedin</a
-          >] │ [<a
+          >}―{<a
             target="_blank"
             href="https://github.com/m5b6"
             rel="noopener noreferrer"
             aria-label="GitHub profile"
             >github</a
-          >] │ [<a
+          >}―{<a
             target="_blank"
             href="mailto:m5b6@proton.me"
             aria-label="Email contact"
             >mail</a
-          >]
+          >}
         </nav>
         <ol aria-label="About me">
           <li>☞ engineer based in Chile</li>
@@ -72,7 +71,7 @@
       </div>
     </main>
     <div id="comment-toggle" class="comment-toggle">✐</div>
-    <div id="comment-box" class="comment-box hidden" >
+    <div id="comment-box" class="comment-box hidden">
       <div class="comment-box-close" id="comment-close">☓</div>
       <h2 class="comments-header">Comments ☺</h2>
       <div id="comments-list"></div>
@@ -80,12 +79,12 @@
         <input
           type="text"
           id="commenter-name"
-          placeholder="name (optional)"
+          placeholder="웃 name (optional)"
           maxlength="50"
         />
         <textarea
           id="comment-text"
-          placeholder="say something nice..."
+          placeholder="✐ say something nice..."
           required
           rows="10"
           minlength="1"
@@ -93,7 +92,16 @@
           pattern="^[a-zA-Z0-9@.,!?'&quot; ]*$"
           oninput="this.value = this.value.replace(/[\r\n\v]+/g, '')"
         ></textarea>
-        <button type="submit">Send</button>
+        <button type="submit" id="submit-button">
+          <p>&nbsp;</p>
+          <p>Send</p>
+
+          <div id="loading-spinner" class="loading-spinner hidden">
+              <img 
+              class="spinner"
+              src="./loading.png"></div>
+          </div>
+        </button>
       </form>
     </div>
   </body>
