@@ -1,51 +1,4 @@
-function updateTimeDate() {
-  const timeDateElement = document.getElementById("time-date");
-  const currentDateTime = new Date();
-
-  const timeOptions = {
-    hour12: false,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    fractionalSecondDigits: 1,
-  };
-
-  const dateOptions = {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  };
-
-  const formattedTime = currentDateTime.toLocaleString("default", timeOptions);
-  const formattedDate = currentDateTime.toLocaleString("default", dateOptions);
-
-  timeDateElement.textContent = `${formattedDate.replace(
-    /\//g,
-    "/"
-  )} ${formattedTime}`;
-}
-
-function toggleMode() {
-  document.documentElement.classList.toggle("dark-mode");
-  const modeSwitch = document.getElementById("mode-switch");
-  const isDarkMode = document.documentElement.classList.contains("dark-mode");
-  modeSwitch.textContent = isDarkMode ? "☀" : "☽";
-  modeSwitch.setAttribute(
-    "aria-label",
-    isDarkMode ? "Switch to light mode" : "Switch to dark mode"
-  );
-}
-
-setInterval(updateTimeDate, 10);
-
-document.getElementById("mode-switch").addEventListener("click", toggleMode);
-
-///////////////////////* COMMENTS *////////////////////////
-///////////////////////* COMMENTS *////////////////////////
-///////////////////////* COMMENTS *////////////////////////
-///////////////////////* COMMENTS *////////////////////////
-
-const API_URL = "https://comments.matiasberrios.com"
+let  API_URL = "https://comments.matiasberrios.com";
 
 function toggleCommentBox() {
   const commentBox = document.getElementById("comment-box");
@@ -153,16 +106,6 @@ document
 
 fetchComments();
 
-///////////////////////* COMMENTS *////////////////////////
-///////////////////////* COMMENTS *////////////////////////
-///////////////////////* COMMENTS *////////////////////////
-///////////////////////* COMMENTS *////////////////////////
-///////////////////////* COMMENTS *////////////////////////
-
-///////////////////////* DRAG *////////////////////////
-///////////////////////* DRAG *////////////////////////
-///////////////////////* DRAG *////////////////////////
-///////////////////////* DRAG *////////////////////////
 dragElement(document.getElementById("comment-box"));
 
 function dragElement(elmnt) {
@@ -177,7 +120,6 @@ function dragElement(elmnt) {
     e = e || window.event;
     e.preventDefault();
 
-    // Check if the target element is an input, button, or textarea
     if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
       e.target.focus();
       return;

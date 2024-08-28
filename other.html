@@ -26,7 +26,7 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
 
-    <script src="./scripts.js" defer></script>
+    <script src="./scripts/widgets.js" defer></script>
     <style>
       .project-table {
         width: 100%;
@@ -50,13 +50,24 @@
   </head>
 
   <body>
-    <div id="blur-overlay" aria-hidden="true">&nbsp;</div>
-    <div
-      id="time-date"
-      class="time-date"
-      aria-live="polite"
-      aria-atomic="true"
-    ></div>
+    <div class="widget">
+      <label for="time-date" class="visually-hidden"
+        >Current time and date</label
+      >
+      <p
+        id="time-date"
+        class="time-date"
+        aria-live="polite"
+        aria-atomic="true"
+      ></p>
+      <label for="visitor-count" class="visually-hidden">Visitor count</label>
+      <p
+        id="visitor-count"
+        class="visitor-count"
+        aria-live="polite"
+        aria-atomic="true"
+      ></p>
+    </div>
     <button id="mode-switch" aria-label="Toggle dark mode">
       <span aria-hidden="true">☽</span>
     </button>

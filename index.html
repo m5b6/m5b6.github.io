@@ -23,7 +23,9 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
 
-    <script src="./scripts.js" defer></script>
+    <script src="./scripts/comments.js" defer></script>
+    <script src="./scripts/widgets.js" defer></script>
+
     <script type="application/ld+json">
       {
         "@context": "http://schema.org",
@@ -46,12 +48,24 @@
 
   <body>
     <div id="blur-overlay" aria-hidden="true">&nbsp;</div>
-    <div
+    <div class="widget">
+    <label for="time-date" class="visually-hidden">Current time and date</label>
+    <p
       id="time-date"
       class="time-date"
       aria-live="polite"
       aria-atomic="true"
-    ></div>
+    ></p>
+    <label for="visitor-count" class="visually-hidden">Visitor count</label>
+    <p
+    id="visitor-count"
+    class="visitor-count"
+    aria-live="polite"
+    aria-atomic="true"
+    >
+    </p>
+    </div>
+  
     <button id="mode-switch" aria-label="Toggle dark mode">
       <span aria-hidden="true">☽</span>
     </button>
@@ -100,7 +114,9 @@
     <div id="comment-toggle" class="comment-toggle" aria-label="Toggle comment section" tabindex="0" role="button">
       <span aria-hidden="true">✐</span>
     </div>
-    <div id="comment-box" class="comment-box hidden" aria-label="Comment section">
+    <div id="comment-box" class="comment-box hidden"
+    draggable="true"
+    aria-label="Comment section">
       <div class="comment-box-close" id="comment-close" aria-label="Close comment section" tabindex="0" role="button">
         <span aria-hidden="true">☓</span>
       </div>
