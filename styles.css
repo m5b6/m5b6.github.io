@@ -313,7 +313,7 @@ div.comment {
   font-size: 0.5em;
   max-width: 100%;
   word-wrap: break-word;
-  display: flex;
+  
 }
 
 .visually-hidden {

@@ -1,4 +1,4 @@
-let  API_URL = "https://comments.matiasberrios.com";
+let API_URL = "https://comments.matiasberrios.com";
 
 function toggleCommentBox() {
   const commentBox = document.getElementById("comment-box");
@@ -28,6 +28,18 @@ function sanitizeHTML(str) {
   return div.innerHTML;
 }
 
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString('en-US', { 
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit', 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    hour12: false 
+  });
+}
+
 function fetchComments() {
   return fetch(`${API_URL}`)
     .then((response) => response.json())
@@ -38,7 +50,8 @@ function fetchComments() {
         const commentElement = document.createElement("div");
         commentElement.classList.add("comment");
 
-        const sanitizedTime = sanitizeHTML(comment.time);
+        const formattedTime = formatTimestamp(comment.timestamp);
+        const sanitizedTime = sanitizeHTML(formattedTime);
         const sanitizedAlias = sanitizeHTML(comment.alias || "Anonymous");
         const sanitizedContent = sanitizeHTML(comment.content);
 
