@@ -17,7 +17,7 @@
       property="og:image"
       content="https://www.matiasberrios.com/og-image-projects.jpg"
     />
-
+    <meta name="referrer" content="no-referrer-when-downgrade" />
     <link rel="canonical" href="https://www.matiasberrios.com/projects" />
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -26,9 +26,10 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
 
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="./scripts/widgets.js" defer></script>
+    <script src="./scripts/experiment.js" defer></script>
   </head>
-
   <body>
     <div class="widget">
       <label for="time-date" class="visually-hidden"
@@ -51,46 +52,29 @@
     <button id="mode-switch" aria-label="Toggle dark mode">
       <span aria-hidden="true">☽</span>
     </button>
-    <main>
-      <div class="column">
-        <h1><a href="/">m5b6</a> ☞ other</h1>
 
-        <table class="project-table" aria-label="Project showcase">
-          <thead>
-            <tr>
-              <th scope="col">Year</th>
-              <th scope="col">Project</th>
-              <th scope="col">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>2024</td>
-              <td>
-                <a
-                  href="experiment.html"
-                  class="project-link"
-                  aria-label="View Enigma project"
-                  >experiment</a
-                >
-              </td>
-              <td>A work in progress</td>
-            </tr>
-            <tr>
-              <td>2024</td>
-              <td>
-                <a
-                  href="#"
-                  class="project-link"
-                  aria-label="View Enigma project"
-                  >WIP</a
-                >
-              </td>
-              <td>A work in progress</td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="login-head">
+      <div
+        class="google"
+        id="g_id_onload"
+        data-client_id="427889074481-09hav2tqqj5rdi3d7ll1s7ff78v0eb55.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+      ></div>
+      <div class="g_id_signin" class="google" data-type="standard"></div>
+    </div>
+
+    <div class="doc-container">
+      <div id="status">
+
+        please sign in to start writing
       </div>
-    </main>
+
+      <textarea
+        id="collaborativeTextarea"
+        rows="20"
+        cols="50"
+        disabled
+      ></textarea>
+    </div>
   </body>
 </html>

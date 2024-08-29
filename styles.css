@@ -62,11 +62,11 @@ body {
 }
 
 .dark-mode body {
-  font-family: "terminal", monospace;
+  /* font-family: "terminal", monospace; */
 }
 
 .dark-mode * {
-  font-family: "terminal", monospace;
+ /*  font-family: "terminal", monospace; */
 }
 
 ::selection {
@@ -121,7 +121,6 @@ li {
   border: 1px solid var(--text-color);
   color: var(--text-color);
   cursor: pointer;
-  font-family: "terminal", monospace;
   font-size: 1.2em;
   width: 1.5em;
   height: 1.5em;
@@ -189,7 +188,8 @@ li {
   padding: 10px;
   z-index: 99;
   height: fit-content;
-  transition: opacity 0.2s cubic-bezier(0.165, 0.84, 0.44, 1), scale 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transition: opacity 0.2s cubic-bezier(0.165, 0.84, 0.44, 1),
+    scale 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .dragging {
@@ -313,7 +313,6 @@ div.comment {
   font-size: 0.5em;
   max-width: 100%;
   word-wrap: break-word;
-  
 }
 
 .visually-hidden {
@@ -325,4 +324,33 @@ div.comment {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   border: 0;
+}
+
+.project-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 2em;
+}
+.project-table th,
+.project-table td {
+  padding: 0.5em 1em;
+  text-align: left;
+  border-bottom: 1px solid var(--text-color);
+}
+.project-table th {
+  font-weight: normal;
+  font-style: italic;
+}
+.project-table tr:hover {
+  background-color: var(--hover-color);
+}
+
+.login-head{
+  position: absolute;
+  top: 10px;
+}
+
+#status{
+  text-align: center;
+  margin-bottom: 10px;
 }

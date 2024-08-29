@@ -49,7 +49,7 @@ async function getVisits() {
   visitorCount = await visitorCount.json();
 
   const visitorCountElement = document.getElementById("visitor-count");
-  visitorCountElement.textContent = `visitor #${visitorCount.count}`;
+  visitorCountElement.textContent = `visitors: ${visitorCount.count}`;
 }
 
 getVisits();
