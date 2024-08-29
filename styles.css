@@ -354,3 +354,8 @@ div.comment {
   text-align: center;
   margin-bottom: 10px;
 }
+
+#collaborativeTextarea{
+  background: var(--bg-color);
+  color: var(--text-color);
+}
