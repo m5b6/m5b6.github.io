@@ -364,8 +364,6 @@ div.comment {
 
 .github-contributions {
   margin: 2rem 0;
-  padding: 1rem;
-  border: 1px solid var(--text-color);
   width: 100%;
   max-width: 100%;
 }
@@ -380,9 +378,9 @@ div.comment {
 .contribution-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 2rem;
-  margin-bottom: 2rem;
-  padding: 1rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
   background-color: var(--text-color);
   color: var(--bg-color);
 }
@@ -392,42 +390,74 @@ div.comment {
   flex-direction: column;
   align-items: center;
   gap: 0.2rem;
+  flex: 1;
+  min-width: 60px;
 }
 
 .stat-number {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: bold;
   line-height: 1;
 }
 
 .stat-text {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   opacity: 0.9;
 }
 
 .contribution-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-  width: fit-content;
-  margin: 0 auto;
+  display: flex;
+  gap: 1px;
+  width: 100%;
+  overflow-x: auto;
   background-color: var(--text-color);
-  padding: 2px;
+  padding: 1px;
+  border: 1px solid var(--text-color);
+  min-height: 120px;
+}
+
+.week-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .contribution-cell {
-  width: 12px;
-  height: 12px;
-  background-color: var(--bg-color);
+  width: 5px;
+  height: 5px;
   position: relative;
-  transition: background-color 0.2s ease;
+  background-color: rgb(0, 0, 0);
+  border: none;
 }
 
-.contribution-cell[data-count="1"] { background-color: rgba(var(--text-color-rgb), 0.2); }
-.contribution-cell[data-count="2"] { background-color: rgba(var(--text-color-rgb), 0.4); }
-.contribution-cell[data-count="3"] { background-color: rgba(var(--text-color-rgb), 0.6); }
-.contribution-cell[data-count="4"] { background-color: rgba(var(--text-color-rgb), 0.8); }
-.contribution-cell[data-count="5"] { background-color: var(--text-color); }
+.contribution-cell[data-count="0"] { background-color: rgb(0, 0, 0); }
+.contribution-cell[data-count="1"] { background-color: rgb(51, 51, 51); }
+.contribution-cell[data-count="2"] { background-color: rgb(102, 102, 102); }
+.contribution-cell[data-count="3"] { background-color: rgb(153, 153, 153); }
+.contribution-cell[data-count="4"] { background-color: rgb(204, 204, 204); }
+.contribution-cell[data-count="5"] { background-color: rgb(255, 255, 255); }
+.contribution-cell[data-count="6"] { background-color: rgb(255, 255, 255); }
+.contribution-cell[data-count="7"] { background-color: rgb(255, 255, 255); }
+.contribution-cell[data-count="8"] { background-color: rgb(255, 255, 255); }
+.contribution-cell[data-count="9"] { background-color: rgb(255, 255, 255); }
+.contribution-cell[data-count="10"] { background-color: rgb(255, 255, 255); }
+
+.dark-mode .contribution-cell {
+  background-color: rgb(255, 255, 255);
+  border-color: var(--text-color);
+}
+
+.dark-mode .contribution-cell[data-count="0"] { background-color: rgb(255, 255, 255); }
+.dark-mode .contribution-cell[data-count="1"] { background-color: rgb(204, 204, 204); }
+.dark-mode .contribution-cell[data-count="2"] { background-color: rgb(153, 153, 153); }
+.dark-mode .contribution-cell[data-count="3"] { background-color: rgb(102, 102, 102); }
+.dark-mode .contribution-cell[data-count="4"] { background-color: rgb(51, 51, 51); }
+.dark-mode .contribution-cell[data-count="5"] { background-color: rgb(0, 0, 0); }
+.dark-mode .contribution-cell[data-count="6"] { background-color: rgb(0, 0, 0); }
+.dark-mode .contribution-cell[data-count="7"] { background-color: rgb(0, 0, 0); }
+.dark-mode .contribution-cell[data-count="8"] { background-color: rgb(0, 0, 0); }
+.dark-mode .contribution-cell[data-count="9"] { background-color: rgb(0, 0, 0); }
+.dark-mode .contribution-cell[data-count="10"] { background-color: rgb(0, 0, 0); }
 
 .contribution-tooltip {
   position: absolute;
@@ -437,13 +467,13 @@ div.comment {
   background-color: var(--text-color);
   color: var(--bg-color);
   padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.2s ease, visibility 0.2s ease;
   pointer-events: none;
+  z-index: 10;
 }
 
 .contribution-cell:hover .contribution-tooltip {
@@ -453,20 +483,46 @@ div.comment {
 
 @media (min-width: 768px) {
   .contribution-cell {
-    width: 16px;
-    height: 16px;
+    width: 10px;
+    height: 10px;
   }
   
-  .github-contributions h2 {
-    font-size: 1.5em;
+  .contribution-grid {
+    gap: 2px;
+    padding: 2px;
+  }
+  
+  .week-column {
+    gap: 2px;
+  }
+  
+  .contribution-stats {
+    gap: 2rem;
+    padding: 1rem;
   }
   
   .stat-number {
-    font-size: 2.5em;
+    font-size: 1.5rem;
   }
   
   .stat-text {
-    font-size: 1em;
+    font-size: 0.8rem;
   }
 }
+
+@media (min-width: 1024px) {
+  .contribution-cell {
+    width: 12px;
+    height: 12px;
+  }
+  
+  .stat-number {
+    font-size: 1.8rem;
+  }
+  
+  .stat-text {
+    font-size: 0.9rem;
+  }
+}
+
 
