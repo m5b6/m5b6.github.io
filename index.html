@@ -24,8 +24,8 @@
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
 
-    <script src="./scripts/comments.js" defer></script>
     <script src="./scripts/widgets.js" defer></script>
+    <script src="./scripts/github-contributions.js" defer></script>
 
     <script type="application/ld+json">
       {
@@ -72,7 +72,7 @@
     </button>
     <main>
       <div class="column">
-        <h1>Matias Berrios, m5b6</h1>
+        <h1>Matias Berrios</h1>
         <nav class="links" aria-label="Main navigation">{<a
           target="_blank"
           href="https://linkedin.com/in/matiasberrios"
@@ -104,50 +104,5 @@
         </ol>
       </div>
     </main>
-    <div id="comment-toggle" class="comment-toggle" aria-label="Toggle comment section" tabindex="0" role="button">
-      <span aria-hidden="true">✐</span>
-    </div>
-    <div id="comment-box" class="comment-box hidden"
-    draggable="true"
-    aria-label="Comment section">
-      <div class="comment-box-close" id="comment-close" aria-label="Close comment section" tabindex="0" role="button">
-        <span aria-hidden="true">☓</span>
-      </div>
-      <h2 class="comments-header">Comments <span aria-hidden="true">☺</span></h2>
-      <div id="comments-list" aria-live="polite"></div>
-      <form id="comment-form" aria-label="Comment form">
-        <label for="commenter-name" class="visually-hidden">Name (optional)</label>
-        <input
-          type="text"
-          id="commenter-name"
-          placeholder="웃 name (optional)"
-          maxlength="20"
-          aria-label="Enter your name (optional)"
-        />
-        <label for="comment-text" class="visually-hidden">Comment</label>
-        <textarea
-          id="comment-text"
-          placeholder="✐ say something nice..."
-          required
-          rows="10"
-          minlength="1"
-          maxlength="100"
-          pattern="^[a-zA-Z0-9@.,!?\'\" ]*$"
-          oninput="this.value = this.value.replace(/[\r\n\v]+/g, '')"
-          aria-label="Enter your comment"
-        ></textarea>
-        <button type="submit" id="submit-button" aria-label="Send comment">
-          <p aria-hidden="true">&nbsp;</p>
-          <p>Send</p>
-          <div id="loading-spinner" class="loading-spinner hidden" aria-hidden="true">
-            <img 
-              class="spinner"
-              src="./assets/loading.png"
-              alt="Loading spinner"
-            />
-          </div>
-        </button>
-      </form>
-    </div>
   </body>
 </html>

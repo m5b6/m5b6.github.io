@@ -359,3 +359,124 @@ div.comment {
   background: var(--bg-color);
   color: var(--text-color);
 }
+
+.github-contributions {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--text-color);
+  width: 100%;
+  max-width: 100%;
+}
+
+.github-contributions h2 {
+  font-size: 1.2em;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.contribution-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 2em;
+  font-weight: bold;
+  line-height: 1;
+  margin-bottom: 0.2em;
+}
+
+.stat-text {
+  font-size: 0.8em;
+  opacity: 0.9;
+}
+
+.contribution-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  background-color: var(--text-color);
+  padding: 2px;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.contribution-cell {
+  width: 12px;
+  height: 12px;
+  background-color: var(--bg-color);
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+
+.contribution-cell[data-count="1"] {
+  background-color: rgba(var(--text-color-rgb), 0.2);
+}
+
+.contribution-cell[data-count="2"] {
+  background-color: rgba(var(--text-color-rgb), 0.4);
+}
+
+.contribution-cell[data-count="3"] {
+  background-color: rgba(var(--text-color-rgb), 0.6);
+}
+
+.contribution-cell[data-count="4"] {
+  background-color: rgba(var(--text-color-rgb), 0.8);
+}
+
+.contribution-cell[data-count="5"] {
+  background-color: var(--text-color);
+}
+
+.contribution-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  pointer-events: none;
+}
+
+.contribution-cell:hover .contribution-tooltip {
+  opacity: 1;
+  visibility: visible;
+}
+
+@media (min-width: 768px) {
+  .contribution-cell {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .github-contributions h2 {
+    font-size: 1.5em;
+  }
+
+  .stat-number {
+    font-size: 2.5em;
+  }
+
+  .stat-text {
+    font-size: 1em;
+  }
+}
