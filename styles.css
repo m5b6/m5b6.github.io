@@ -1,6 +1,7 @@
 :root {
   --bg-color: white;
   --text-color: black;
+  --text-color-rgb: 0, 0, 0;
   --selection-bg: #ff0000;
   --selection-text: white;
 }
@@ -30,6 +31,7 @@ body {
 .dark-mode {
   --bg-color: black;
   --text-color: white;
+  --text-color-rgb: 255, 255, 255;
   --selection-bg: rgb(24, 237, 9);
   --selection-text: black;
 }
@@ -361,7 +363,7 @@ div.comment {
 }
 
 .github-contributions {
-  margin-top: 2rem;
+  margin: 2rem 0;
   padding: 1rem;
   border: 1px solid var(--text-color);
   width: 100%;
@@ -369,14 +371,16 @@ div.comment {
 }
 
 .github-contributions h2 {
-  font-size: 1.2em;
+  font-size: 1rem;
   margin-bottom: 1rem;
   text-align: left;
+  font-weight: normal;
 }
 
 .contribution-stats {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 2rem;
   margin-bottom: 2rem;
   padding: 1rem;
   background-color: var(--text-color);
@@ -387,18 +391,17 @@ div.comment {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  gap: 0.2rem;
 }
 
 .stat-number {
-  font-size: 2em;
+  font-size: 1.5rem;
   font-weight: bold;
   line-height: 1;
-  margin-bottom: 0.2em;
 }
 
 .stat-text {
-  font-size: 0.8em;
+  font-size: 0.8rem;
   opacity: 0.9;
 }
 
@@ -406,10 +409,10 @@ div.comment {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
-  background-color: var(--text-color);
-  padding: 2px;
   width: fit-content;
   margin: 0 auto;
+  background-color: var(--text-color);
+  padding: 2px;
 }
 
 .contribution-cell {
@@ -420,25 +423,11 @@ div.comment {
   transition: background-color 0.2s ease;
 }
 
-.contribution-cell[data-count="1"] {
-  background-color: rgba(var(--text-color-rgb), 0.2);
-}
-
-.contribution-cell[data-count="2"] {
-  background-color: rgba(var(--text-color-rgb), 0.4);
-}
-
-.contribution-cell[data-count="3"] {
-  background-color: rgba(var(--text-color-rgb), 0.6);
-}
-
-.contribution-cell[data-count="4"] {
-  background-color: rgba(var(--text-color-rgb), 0.8);
-}
-
-.contribution-cell[data-count="5"] {
-  background-color: var(--text-color);
-}
+.contribution-cell[data-count="1"] { background-color: rgba(var(--text-color-rgb), 0.2); }
+.contribution-cell[data-count="2"] { background-color: rgba(var(--text-color-rgb), 0.4); }
+.contribution-cell[data-count="3"] { background-color: rgba(var(--text-color-rgb), 0.6); }
+.contribution-cell[data-count="4"] { background-color: rgba(var(--text-color-rgb), 0.8); }
+.contribution-cell[data-count="5"] { background-color: var(--text-color); }
 
 .contribution-tooltip {
   position: absolute;
@@ -449,7 +438,7 @@ div.comment {
   color: var(--bg-color);
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.8em;
+  font-size: 0.8rem;
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
@@ -471,12 +460,13 @@ div.comment {
   .github-contributions h2 {
     font-size: 1.5em;
   }
-
+  
   .stat-number {
     font-size: 2.5em;
   }
-
+  
   .stat-text {
     font-size: 1em;
   }
 }
+

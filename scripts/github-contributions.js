@@ -148,3 +148,162 @@ async function initGitHubContributions() {
 
 // Initialize when the DOM is loaded
 document.addEventListener('DOMContentLoaded', initGitHubContributions);  */
+
+async function fetchGitHubContributions() {
+  try {
+    const response = await fetch('https://github-contributions-api.jogruber.de/v4/m5b6');
+    const data = await response.json();
+    
+    // Process the data
+    const contributionData = {};
+    const today = new Date().toISOString().split('T')[0];
+    const lastMonth = new Date();
+    lastMonth.setMonth(lastMonth.getMonth() - 1);
+    const lastYear = new Date();
+    lastYear.setFullYear(lastYear.getFullYear() - 1);
+
+    let todayCount = 0;
+    let monthCount = 0;
+    let yearCount = 0;
+    let currentStreak = 0;
+    let maxStreak = 0;
+    let tempStreak = 0;
+
+    // Process contributions array
+    data.contributions.forEach(contribution => {
+      const date = contribution.date;
+      const count = contribution.count;
+      contributionData[date] = count;
+      
+      if (date === today) todayCount = count;
+      if (date >= lastMonth.toISOString().split('T')[0]) monthCount += count;
+      if (date >= lastYear.toISOString().split('T')[0]) yearCount += count;
+
+      // Calculate streaks
+      if (count > 0) {
+        tempStreak++;
+        maxStreak = Math.max(maxStreak, tempStreak);
+        if (date === today) currentStreak = tempStreak;
+      } else {
+        tempStreak = 0;
+      }
+    });
+
+    // Get total contributions from the total object
+    const totalContributions = Object.values(data.total).reduce((a, b) => a + b, 0);
+
+    return {
+      contributions: contributionData,
+      stats: {
+        totalContributions,
+        totalCommits: yearCount,
+        currentStreak,
+        maxStreak
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching GitHub contributions:', error);
+    return { contributions: {}, stats: {} };
+  }
+}
+
+function calculateStats(contributions, stats) {
+  const today = new Date().toISOString().split('T')[0];
+  const lastMonth = new Date();
+  lastMonth.setMonth(lastMonth.getMonth() - 1);
+  const lastYear = new Date();
+  lastYear.setFullYear(lastYear.getFullYear() - 1);
+
+  let todayCount = contributions[today] || 0;
+  let monthCount = 0;
+  let yearCount = 0;
+
+  Object.entries(contributions).forEach(([date, count]) => {
+    if (date >= lastMonth.toISOString().split('T')[0]) monthCount += count;
+    if (date >= lastYear.toISOString().split('T')[0]) yearCount += count;
+  });
+
+  return {
+    todayCount,
+    monthCount,
+    yearCount,
+    totalContributions: stats.totalContributions || 0,
+    currentStreak: stats.currentStreak || 0,
+    maxStreak: stats.maxStreak || 0
+  };
+}
+
+function createContributionVisualization(data) {
+  const container = document.createElement('div');
+  container.className = 'github-contributions';
+  
+  const stats = calculateStats(data.contributions, data.stats);
+  
+  const title = document.createElement('h2');
+  title.textContent = 'Contribuciones';
+  container.appendChild(title);
+
+  const statsContainer = document.createElement('div');
+  statsContainer.className = 'contribution-stats';
+  
+  const todayStat = document.createElement('div');
+  todayStat.className = 'stat-item';
+  todayStat.innerHTML = `<span class="stat-number">${stats.todayCount}</span> <span class="stat-text">hoy</span>`;
+  
+  const monthStat = document.createElement('div');
+  monthStat.className = 'stat-item';
+  monthStat.innerHTML = `<span class="stat-number">${stats.monthCount}</span> <span class="stat-text">este mes</span>`;
+  
+  const yearStat = document.createElement('div');
+  yearStat.className = 'stat-item';
+  yearStat.innerHTML = `<span class="stat-number">${stats.yearCount}</span> <span class="stat-text">este año</span>`;
+  
+  const streakStat = document.createElement('div');
+  streakStat.className = 'stat-item';
+  streakStat.innerHTML = `<span class="stat-number">${stats.currentStreak}</span> <span class="stat-text">racha</span>`;
+  
+  statsContainer.appendChild(todayStat);
+  statsContainer.appendChild(monthStat);
+  statsContainer.appendChild(yearStat);
+  statsContainer.appendChild(streakStat);
+  container.appendChild(statsContainer);
+
+  const grid = document.createElement('div');
+  grid.className = 'contribution-grid';
+  
+  // Create a grid of the last 7x7 days (49 days)
+  const today = new Date();
+  for (let i = 48; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(date.getDate() - i);
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const cell = document.createElement('div');
+    cell.className = 'contribution-cell';
+    cell.setAttribute('data-date', dateStr);
+    cell.setAttribute('data-count', data.contributions[dateStr] || 0);
+    
+    // Add tooltip
+    const tooltip = document.createElement('div');
+    tooltip.className = 'contribution-tooltip';
+    tooltip.textContent = `${dateStr}: ${data.contributions[dateStr] || 0} contribuciones`;
+    cell.appendChild(tooltip);
+    
+    grid.appendChild(cell);
+  }
+  
+  container.appendChild(grid);
+  return container;
+}
+
+async function initGitHubContributions() {
+  const data = await fetchGitHubContributions();
+  const visualization = createContributionVisualization(data);
+  
+  // Add the visualization after the main content
+  const main = document.querySelector('main');
+  main.appendChild(visualization);
+}
+
+// Initialize when the DOM is loaded
+document.addEventListener('DOMContentLoaded', initGitHubContributions);
