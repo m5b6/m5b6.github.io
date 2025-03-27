@@ -1,4 +1,4 @@
-async function fetchGitHubContributions() {
+/* async function fetchGitHubContributions() {
   try {
     const response = await fetch(
       "https://github-contributions-api.jogruber.de/v4/m5b6"
@@ -348,3 +348,4 @@ async function initGitHubContributions() {
 }
 
 document.addEventListener("DOMContentLoaded", initGitHubContributions);
+ */
