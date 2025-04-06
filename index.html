@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light-mode">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,18 +7,18 @@
     <title>m5b6</title>
     <meta
       name="description"
-      content="Matias Berrios (m5b6) is an engineer based in Chile, currently working at Fintoc and building a stealth mode startup."
+      content="Matias Berrios is an engineer from Chile."
     />
     <meta name="author" content="Matias Berrios" />
     <meta
       name="keywords"
-      content="Matias Berrios, m5b6, engineer, Chile, Fintoc, startup, technology, innovation"
+      content="Matias Berrios, m5b6, engineer, Chile, Vita, startup, technology, innovation"
     />
 
-    <meta property="og:title" content="Matias Berrios (m5b6) - Engineer" />
+    <meta property="og:title" content="Matias Berrios" />
     <meta
       property="og:description"
-      content="Homepage to Matias Berrios (m5b6), engineer from Chile."
+      content="Homepage to Matias Berrios, engineer from Chile."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://www.matiasberrios.com" />
@@ -32,9 +32,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/styles.css" />
-
-    <script src="./scripts/widgets.js" defer></script>
-    <script src="./scripts/github-contributions.js" defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/@sakun/system.css" />
+    <script src="https://unpkg.com/figlet@1.8.0/lib/figlet.js"></script>
 
     <script type="application/ld+json">
       {
@@ -42,7 +41,7 @@
         "@type": "Person",
         "name": "Matias Berrios",
         "alternateName": "m5b6",
-        "jobTitle": "Engineer",
+        "jobTitle": "Engineer, CTO",
         "worksFor": {
           "@type": "Organization",
           "name": "Vita"
@@ -57,60 +56,110 @@
   </head>
 
   <body>
-    <div id="blur-overlay" aria-hidden="true">&nbsp;</div>
-    <div class="widget">
-      <label for="time-date" class="visually-hidden"
-        >Current time and date</label
-      >
-      <p
-        id="time-date"
-        class="time-date"
-        aria-live="polite"
-        aria-atomic="true"
-      ></p>
-      <label for="visitor-count" class="visually-hidden">Visitor count</label>
-      <p
-        id="visitor-count"
-        class="visitor-count"
-        aria-live="polite"
-        aria-atomic="true"
-      ></p>
+    <div class="window">
+      <div class="title-bar">
+        <h1 class="title">Matias Berrios</h1>
+      </div>
+      <div class="separator"></div>
+      <div class="window-pane">
+        <pre id="figlet-output" aria-hidden="true"></pre>
+
+        <div class="info-section" aria-label="About Matias Berrios">
+          <p>Founder of <a href="https://vita.lat" target="_blank" rel="noopener noreferrer">Vita</a></p>
+          <p>Based in Santiago, Chile</p>
+        </div>
+        
+        <nav aria-label="Links">
+          <button
+            class="btn"
+            onclick="window.open('https://linkedin.com/in/matiasberrios', '_blank')"
+            aria-label="LinkedIn Profile" title="LinkedIn"
+          >
+            <img src="assets/in.png" alt="LinkedIn">
+          </button>
+          <button
+            class="btn"
+            onclick="window.open('https://github.com/m5b6', '_blank')"
+            aria-label="GitHub Profile" title="GitHub"
+          >
+            <img src="assets/gh.png" alt="GitHub">
+          </button>
+          <button
+            class="btn"
+            onclick="window.open('mailto:mati@vita.lat', '_blank')"
+            aria-label="Email Contact" title="Email"
+          >
+            <img src="assets/mail.png" alt="Email">
+          </button>
+        </nav>
+      </div>
     </div>
 
-    <button id="mode-switch" aria-label="Toggle dark mode">
-      <span aria-hidden="true">☽</span>
-    </button>
-    <main>
-      <div class="column">
-        <h1>Matias Berrios</h1>
-        <nav class="links" aria-label="Main navigation">
-          {<a
-            target="_blank"
-            href="https://linkedin.com/in/matiasberrios"
-            rel="noopener noreferrer"
-            aria-label="LinkedIn profile"
-            >linkedin</a
-          >}―{<a
-            target="_blank"
-            href="https://github.com/m5b6"
-            rel="noopener noreferrer"
-            aria-label="GitHub profile"
-            >github</a
-          >}―{<a
-            target="_blank"
-            href="mailto:m5b6@proton.me"
-            aria-label="Email contact"
-            >mail</a
-          >}
-        </nav>
-        <ol aria-label="About Matias Berrios">
-          <li>☞ ingeniero @ Chile</li>
-          <li>
-            ☞ construyendo @
-            <a href="https://vita.lat">Vita</a>
-          </li>
-        </ol>
-      </div>
-    </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        figlet.text(
+          "m5b6",
+          {
+            font: "Standard",
+            horizontalLayout: "default",
+            verticalLayout: "default",
+            width: 60,
+            whitespaceBreak: true,
+          },
+          function (err, data) {
+            if (err) {
+              console.log("Something went wrong with Figlet...");
+              console.dir(err);
+              return;
+            }
+            const figletOutput = document.getElementById("figlet-output");
+            if (figletOutput) {
+              figletOutput.textContent = data;
+            }
+          }
+        );
+
+        const windowElement = document.querySelector(".window");
+        const titleBar = windowElement.querySelector(".title-bar");
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        const moveWindow = (e) => {
+          if (!isDragging) return;
+          const currentX = e.pageX || e.touches[0].pageX;
+          const currentY = e.pageY || e.touches[0].pageY;
+          windowElement.style.left = `${currentX - offsetX}px`;
+          windowElement.style.top = `${currentY - offsetY}px`;
+          windowElement.style.transform = "none";
+        };
+
+        const startDrag = (e) => {
+          isDragging = true;
+          const startX = e.pageX || e.touches[0].pageX;
+          const startY = e.pageY || e.touches[0].pageY;
+          const rect = windowElement.getBoundingClientRect();
+          offsetX = startX - rect.left;
+          offsetY = startY - rect.top;
+          document.addEventListener("mousemove", moveWindow);
+          document.addEventListener("touchmove", moveWindow);
+          document.addEventListener("mouseup", endDrag);
+          document.addEventListener("touchend", endDrag);
+          windowElement.classList.add("is-dragging");
+        };
+
+        const endDrag = () => {
+          if (!isDragging) return;
+          isDragging = false;
+          document.removeEventListener("mousemove", moveWindow);
+          document.removeEventListener("touchmove", moveWindow);
+          document.removeEventListener("mouseup", endDrag);
+          document.removeEventListener("touchend", endDrag);
+          windowElement.classList.remove("is-dragging");
+        };
+
+        titleBar.addEventListener("mousedown", startDrag);
+        titleBar.addEventListener("touchstart", startDrag);
+      });
+    </script>
   </body>
 </html>
