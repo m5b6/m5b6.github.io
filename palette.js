@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const cellSize = 10;
+  const cellSize = 15;
 
   if (window.innerWidth <= 768) { 
     console.log("Palette functionality disabled on smaller screens.");
