@@ -95,29 +95,36 @@
       </div>
     </div>
 
+    <div class="window palette-window" style="top: 20%; left: 30%;" id="palette-window">
+        <div class="title-bar">
+          <h1 class="title">✏</h1>
+        </div>
+        <div class="separator"></div>
+        <div class="window-pane palette-pane">
+          <div class="color-swatches">
+            <button class="color-swatch" style="background-color: #FFFFFF;" data-color="#FFFFFF" title="White"></button>
+            <button class="color-swatch" style="background-color: #DDDDDD;" data-color="#DDDDDD" title="Light Grey"></button>
+            <button class="color-swatch" style="background-color: #AAAAAA;" data-color="#AAAAAA" title="Medium Grey"></button>
+            <button class="color-swatch" style="background-color: #000000;" data-color="#000000" title="Black"></button>
+
+            <button class="color-swatch" style="background-color: #FF0000;" data-color="#FF0000" title="Red"></button>
+            <button class="color-swatch" style="background-color: #0000FF;" data-color="#0000FF" title="Blue"></button>
+            <button class="color-swatch" style="background-color: #FFFF00;" data-color="#FFFF00" title="Yellow"></button>
+            <button class="color-swatch" style="background-color: #FFD700;" data-color="#FFD700" title="Gold"></button>
+
+            <button class="color-swatch" style="background-color: #F0F8FF;" data-color="#F0F8FF" title="Alice Blue"></button>
+            <button class="color-swatch" style="background-color: #DEB887;" data-color="#DEB887" title="Burly Wood"></button>
+            <button class="color-swatch" style="background-color: #7FFFD4;" data-color="#7FFFD4" title="Aquamarine"></button>
+            <button class="color-swatch" style="background-color: transparent;" data-color="transparent" title="Eraser"></button>
+
+
+          </div>
+        </div>
+    </div>
+
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        figlet.text(
-          "m5b6",
-          {
-            font: "Standard",
-            horizontalLayout: "default",
-            verticalLayout: "default",
-            width: 60,
-            whitespaceBreak: true,
-          },
-          function (err, data) {
-            if (err) {
-              console.log("Something went wrong with Figlet...");
-              console.dir(err);
-              return;
-            }
-            const figletOutput = document.getElementById("figlet-output");
-            if (figletOutput) {
-              figletOutput.textContent = data;
-            }
-          }
-        );
+   
 
         const windowElement = document.querySelector(".window");
         const titleBar = windowElement.querySelector(".title-bar");
@@ -161,5 +168,6 @@
         titleBar.addEventListener("touchstart", startDrag);
       });
     </script>
+    <script src="palette.js"></script>
   </body>
 </html>

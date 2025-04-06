@@ -2,7 +2,6 @@ body {
   min-height: 100vh;
   padding: 1rem;
   box-sizing: border-box;
-  background-color: var(--surface);
   overflow: hidden;
 }
 
@@ -13,7 +12,12 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 2px 2px 0px 0px rgba(0,0,0,0.75);
+  box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 0.75);
+  user-select: none;
+}
+
+.window:not(#palette-window) {
+  z-index: 7;
 }
 
 .window .title-bar {
@@ -89,6 +93,50 @@ nav[aria-label="Links"] .btn img {
   padding: 0 !important;
 }
 
-.window{
+#palette-window {
+  max-width: 200px;
+  width: auto;
+  position: absolute;
+  z-index: 10;
   user-select: none;
+}
+
+#palette-window .title-bar {
+  cursor: move;
+  user-select: none;
+}
+
+.palette-pane {
+  padding: 0.5rem;
+}
+
+.color-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.color-swatch.selected-swatch {
+  border: 3px solid #000000;
+  box-shadow: none;
+}
+
+.window.palette-window {
+  @media (max-width: 768px) {
+    display: none;
+  }
+}
+
+.grid-cell {
+  border: none !important;
 }
