@@ -67,6 +67,52 @@ test("paints, undoes, redoes, and clears a shared stroke", async ({
     .toBe(0);
 });
 
+test("renders a stroke before its network save completes", async ({
+  page,
+  request,
+}) => {
+  await clearSharedCanvas(request);
+  await page.goto("/");
+  await expect(page.locator(".sync-status")).toHaveText("Live");
+
+  let releasePaint = () => {};
+  const paintGate = new Promise<void>((resolve) => {
+    releasePaint = resolve;
+  });
+  await page.route("**/api/canvas", async (route) => {
+    const requestBody = route.request();
+    if (
+      requestBody.method() === "POST" &&
+      (requestBody.postDataJSON() as { action?: string } | null)?.action === "paint"
+    ) {
+      await paintGate;
+    }
+    await route.continue();
+  });
+
+  await page.getByRole("button", { name: "Red", exact: true }).click();
+  const startedAt = Date.now();
+  await page.mouse.click(1180, 650);
+  await expect
+    .poll(() => paintedPixelCount(page), {
+      intervals: [10, 20, 40],
+      timeout: 300,
+    })
+    .toBeGreaterThan(0);
+  expect(Date.now() - startedAt).toBeLessThan(300);
+
+  releasePaint();
+  await expect
+    .poll(async () => {
+      const snapshot = await request.get("/api/canvas");
+      return Object.keys(
+        ((await snapshot.json()) as { pixels: Record<string, string> }).pixels,
+      ).length;
+    })
+    .toBeGreaterThan(0);
+  await clearSharedCanvas(request);
+});
+
 test("synchronizes another visitor's pixels and cursor", async ({
   browser,
   request,
@@ -76,14 +122,21 @@ test("synchronizes another visitor's pixels and cursor", async ({
   const secondContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
   const first = await firstContext.newPage();
   const second = await secondContext.newPage();
+  let secondSnapshotReads = 0;
+  await second.route("**/api/canvas", async (route) => {
+    if (route.request().method() === "GET") secondSnapshotReads += 1;
+    await route.continue();
+  });
 
   await Promise.all([first.goto("/"), second.goto("/")]);
   await Promise.all([
     expect(first.locator(".sync-status")).toHaveText("Live"),
     expect(second.locator(".sync-status")).toHaveText("Live"),
   ]);
+  const readsBeforePaint = secondSnapshotReads;
 
   await first.getByRole("button", { name: "Blue", exact: true }).click();
+  const startedAt = Date.now();
   await first.mouse.click(1180, 650);
 
   await expect
@@ -92,8 +145,11 @@ test("synchronizes another visitor's pixels and cursor", async ({
         const context = canvas.getContext("2d")!;
         return Array.from(context.getImageData(92, 57, 1, 1).data);
       }),
+      { intervals: [25, 50, 100], timeout: 1_500 },
     )
     .toEqual([0, 0, 255, 255]);
+  expect(Date.now() - startedAt).toBeLessThan(1_500);
+  expect(secondSnapshotReads).toBe(readsBeforePaint);
 
   await first.mouse.move(1050, 610);
   await expect(second.locator(".remote-cursor").first()).toBeVisible();

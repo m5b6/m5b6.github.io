@@ -41,6 +41,18 @@ type PaintingSurfaceProps = {
 
 type Position = { left: number; top: number };
 
+function drawPixel(canvas: HTMLCanvasElement | null, change: PixelChange) {
+  const context = canvas?.getContext("2d");
+  if (!context) return;
+
+  if (change.color === "transparent") {
+    context.clearRect(change.x, change.y, 1, 1);
+  } else {
+    context.fillStyle = change.color;
+    context.fillRect(change.x, change.y, 1, 1);
+  }
+}
+
 function DraggableWindow({
   className,
   title,
@@ -214,7 +226,9 @@ export function PaintingSurface({
       const key = `${point.x}:${point.y}:${selectedColor}`;
       if (lastPixel.current === key) return;
       lastPixel.current = key;
-      onPaintPixel({ ...point, color: selectedColor });
+      const change = { ...point, color: selectedColor } satisfies PixelChange;
+      drawPixel(canvasRef.current, change);
+      onPaintPixel(change);
     },
     [onPaintPixel, selectedColor],
   );
