@@ -1,0 +1,310 @@
+@import url("https://unpkg.com/@sakun/system.css");
+
+:root {
+  --canvas-columns: 100;
+  --canvas-rows: 64;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  color: var(--text, #111111);
+  background: #ffffff;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.loading-screen {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  font-family: Geneva, Chicago, sans-serif;
+}
+
+.painting-stage {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.045) 1px, transparent 1px);
+  background-size:
+    calc(100vw / var(--canvas-columns)) calc(100vh / var(--canvas-rows)),
+    calc(100vw / var(--canvas-columns)) calc(100vh / var(--canvas-rows));
+}
+
+.painting-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100vw;
+  height: 100vh;
+  image-rendering: pixelated;
+  touch-action: none;
+}
+
+.painting-canvas.painting-enabled {
+  cursor: crosshair;
+}
+
+.cursor-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.remote-cursor {
+  --cursor-color: #000000;
+  position: absolute;
+  display: flex;
+  align-items: flex-start;
+  filter: drop-shadow(1px 1px 0 #ffffff);
+  transform: translate(-2px, -2px);
+  transition: left 70ms linear, top 70ms linear;
+}
+
+.remote-cursor svg {
+  width: 22px;
+  height: 26px;
+  flex: 0 0 auto;
+  fill: var(--cursor-color);
+  stroke: #ffffff;
+  stroke-width: 1.5;
+}
+
+.remote-cursor span {
+  max-width: 210px;
+  margin: 17px 0 0 -2px;
+  padding: 3px 6px;
+  overflow: hidden;
+  color: #ffffff;
+  font: 11px/1.2 Geneva, Chicago, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--cursor-color);
+  border: 1px solid #ffffff;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.65);
+}
+
+.agent-cursor span {
+  border-style: dashed;
+}
+
+.window {
+  position: absolute;
+  z-index: 7;
+  width: min(90vw, 450px);
+  max-width: 450px;
+  user-select: none;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.75);
+}
+
+.window .title-bar {
+  cursor: move;
+  touch-action: none;
+}
+
+.window-pane {
+  padding: 1.5rem;
+}
+
+.profile-window {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ascii-mark {
+  margin: 0 0 1.4rem;
+  color: var(--text, #111111);
+  font: 700 1rem/1.05 monospace;
+  text-align: center;
+  white-space: pre;
+}
+
+.info-section p {
+  margin: 0.5rem 0;
+}
+
+a {
+  color: var(--anchor-text, #0000ee);
+}
+
+nav[aria-label="Links"] {
+  display: flex;
+  gap: 0.7rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.icon-button {
+  display: inline-grid;
+  min-width: 40px;
+  min-height: 28px;
+  padding: 4px 8px !important;
+  place-items: center;
+}
+
+.icon-button img {
+  width: auto;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.palette-window {
+  top: 12%;
+  left: 7%;
+  z-index: 10;
+  width: 218px;
+}
+
+.palette-window .window-pane {
+  padding: 0.65rem;
+}
+
+.presence-row {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  font: 11px/1.2 Geneva, Chicago, sans-serif;
+}
+
+.presence-dot {
+  width: 7px;
+  height: 7px;
+  background: #00a36c;
+  border: 1px solid #006341;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px #ffffff;
+}
+
+.sync-status {
+  margin-left: auto;
+  color: #666666;
+}
+
+.color-swatches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.45rem;
+  justify-content: center;
+}
+
+.color-swatch {
+  width: 34px;
+  height: 31px;
+  padding: 0;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.12);
+}
+
+.color-swatch.selected-swatch {
+  outline: 3px solid #000000;
+  outline-offset: 1px;
+}
+
+.eraser-swatch {
+  color: #111111;
+  font: 700 20px/1 monospace;
+  background:
+    linear-gradient(45deg, #dddddd 25%, transparent 25%) 0 0 / 10px 10px,
+    linear-gradient(45deg, transparent 75%, #dddddd 75%) 0 0 / 10px 10px,
+    linear-gradient(45deg, transparent 75%, #dddddd 75%) 5px -5px / 10px 10px,
+    linear-gradient(45deg, #dddddd 25%, #ffffff 25%) 5px -5px / 10px 10px;
+}
+
+.palette-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+  margin-top: 0.7rem;
+}
+
+.palette-actions button {
+  min-width: 0;
+  padding: 3px 2px;
+  font-size: 11px;
+}
+
+.palette-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.agent-link,
+.setup-notice {
+  margin: 0.7rem 0 0;
+  font: 11px/1.3 Geneva, Chicago, sans-serif;
+}
+
+.setup-notice {
+  padding: 0.35rem;
+  color: #5c4100;
+  background: #fff4bf;
+  border: 1px solid #bc9200;
+}
+
+@media (max-width: 700px) {
+  .profile-window {
+    top: 38%;
+  }
+
+  .profile-window .window-pane {
+    padding: 1rem;
+  }
+
+  .palette-window {
+    top: auto;
+    bottom: 0.7rem;
+    left: 50%;
+    width: min(94vw, 360px);
+    transform: translateX(-50%);
+  }
+
+  .palette-window .window-pane {
+    padding: 0.5rem;
+  }
+
+  .color-swatches {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.35rem;
+  }
+
+  .color-swatch {
+    width: 100%;
+    min-width: 28px;
+    height: 28px;
+  }
+
+  .agent-link,
+  .setup-notice {
+    display: none;
+  }
+
+  .remote-cursor span {
+    max-width: 130px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .remote-cursor {
+    transition: none;
+  }
+}
