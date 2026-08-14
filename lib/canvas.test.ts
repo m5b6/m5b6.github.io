@@ -7,6 +7,7 @@ import {
   participantColor,
   pixelKey,
   pointFromViewport,
+  pointsOnLine,
 } from "./canvas";
 
 describe("canvas coordinates", () => {
@@ -22,6 +23,18 @@ describe("canvas coordinates", () => {
     expect(parsePixelKey(pixelKey(42, 17))).toEqual({ x: 42, y: 17 });
     expect(parsePixelKey(`${CANVAS_WIDTH}:0`)).toBeNull();
     expect(parsePixelKey("not:a:pixel")).toBeNull();
+  });
+
+  it("fills every pixel between sparse pointer samples", () => {
+    expect(pointsOnLine({ x: 2, y: 3 }, { x: 7, y: 5 })).toEqual([
+      { x: 2, y: 3 },
+      { x: 3, y: 3 },
+      { x: 4, y: 4 },
+      { x: 5, y: 4 },
+      { x: 6, y: 5 },
+      { x: 7, y: 5 },
+    ]);
+    expect(pointsOnLine({ x: 4, y: 6 }, { x: 4, y: 2 })).toHaveLength(5);
   });
 });
 
