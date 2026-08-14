@@ -61,6 +61,12 @@ export type PixelChange = {
   color: CanvasColor;
 };
 
+export type PixelTuple = readonly [
+  x: number,
+  y: number,
+  color: CanvasColor,
+];
+
 export function pixelKey(x: number, y: number) {
   return `${x}:${y}`;
 }

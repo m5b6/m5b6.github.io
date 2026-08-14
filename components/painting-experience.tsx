@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  MAX_AGENT_PIXELS,
   parsePixelKey,
   participantColor,
   pixelKey,
@@ -10,6 +11,7 @@ import {
   type ParticipantIdentity,
   type ParticipantKind,
   type PixelChange,
+  type PixelTuple,
   type Point,
   type StoredParticipant,
 } from "@/lib/canvas";
@@ -30,8 +32,14 @@ type CanvasEvent =
   | { type: "ready" }
   | { type: "refresh"; revision: number }
   | {
-      type: "presence";
+      type: "pixels";
       revision: number;
+      participant: StoredParticipant;
+      pixels: PixelTuple[];
+    }
+  | { type: "clear"; revision: number }
+  | {
+      type: "presence";
       participant: StoredParticipant;
     };
 
@@ -94,6 +102,17 @@ function applyPixelChanges(
   return next;
 }
 
+function mutatePixelChanges(
+  current: Record<string, string>,
+  changes: readonly PixelChange[],
+) {
+  for (const change of changes) {
+    const key = pixelKey(change.x, change.y);
+    if (change.color === "transparent") delete current[key];
+    else current[key] = change.color;
+  }
+}
+
 function historyPixels(changes: StrokeChange[], direction: "before" | "after") {
   return changes.flatMap((change): PixelChange[] => {
     const point = parsePixelKey(change.key);
@@ -135,12 +154,25 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
   const [status, setStatus] = useState("Connecting…");
   const [undoStack, setUndoStack] = useState<StrokeChange[][]>([]);
   const [redoStack, setRedoStack] = useState<StrokeChange[][]>([]);
+  const pixelsRef = useRef<Record<string, string>>({});
+  const revision = useRef(0);
   const activeStroke = useRef<Map<string, StrokeChange> | null>(null);
   const pendingPixels = useRef<Map<string, PixelChange>>(new Map());
   const flushTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flushInFlight = useRef(false);
+  const clearQueued = useRef(false);
+  const flushPixelsRef = useRef<() => void>(() => {});
+  const renderFrame = useRef<number | null>(null);
   const presenceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const presenceInFlight = useRef(false);
+  const presenceDirty = useRef(false);
+  const presenceFlush = useRef<() => void>(() => {});
   const cursor = useRef<Point | null>(null);
   const writeQueue = useRef<Promise<void>>(Promise.resolve());
+  const snapshotRequest = useRef<Promise<void> | null>(null);
+  const snapshotRefresh = useRef<() => void>(() => {});
+  const snapshotReady = useRef(false);
+  const eventsReady = useRef(false);
 
   const enqueueWrite = useCallback((operation: () => Promise<void>) => {
     const queued = writeQueue.current.catch(() => {}).then(operation);
@@ -148,119 +180,276 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
     return queued;
   }, []);
 
-  const fetchSnapshot = useCallback(async () => {
-    const response = await fetch("/api/canvas", { cache: "no-store" });
-    if (!response.ok) throw new Error("Canvas read failed");
-    const snapshot = (await response.json()) as CanvasSnapshot;
-    const optimistic = applyPixelChanges(
-      snapshot.pixels,
-      [...pendingPixels.current.values()],
-    );
-    setPixels(optimistic);
-    setParticipants(snapshot.participants);
-    setStatus("Live");
+  const publishPixels = useCallback((immediately = false) => {
+    const publish = () => {
+      renderFrame.current = null;
+      setPixels({ ...pixelsRef.current });
+    };
+
+    if (immediately) {
+      if (renderFrame.current !== null) cancelAnimationFrame(renderFrame.current);
+      publish();
+    } else if (renderFrame.current === null) {
+      renderFrame.current = requestAnimationFrame(publish);
+    }
   }, []);
 
-  const flushPixels = useCallback(async () => {
+  const markLive = useCallback(() => {
+    if (snapshotReady.current && eventsReady.current) setStatus("Live");
+  }, []);
+
+  const fetchSnapshot = useCallback(async () => {
+    if (snapshotRequest.current) return snapshotRequest.current;
+    let stale = false;
+
+    const request = (async () => {
+      const response = await fetch("/api/canvas", { cache: "no-store" });
+      if (!response.ok) throw new Error("Canvas read failed");
+      const snapshot = (await response.json()) as CanvasSnapshot;
+      if (snapshot.revision < revision.current) {
+        stale = true;
+        return;
+      }
+
+      revision.current = snapshot.revision;
+      pixelsRef.current = { ...snapshot.pixels };
+      mutatePixelChanges(
+        pixelsRef.current,
+        [...pendingPixels.current.values()],
+      );
+      publishPixels(true);
+      setParticipants(snapshot.participants);
+      snapshotReady.current = true;
+      markLive();
+    })();
+
+    snapshotRequest.current = request;
+    try {
+      await request;
+    } finally {
+      if (snapshotRequest.current === request) snapshotRequest.current = null;
+    }
+    if (stale) queueMicrotask(snapshotRefresh.current);
+  }, [markLive, publishPixels]);
+
+  useEffect(() => {
+    snapshotRefresh.current = () => {
+      void fetchSnapshot().catch(() => setStatus("Reconnecting…"));
+    };
+  }, [fetchSnapshot]);
+
+  const flushPixels = useCallback(() => {
     if (flushTimer.current) clearTimeout(flushTimer.current);
     flushTimer.current = null;
-    const changes = [...pendingPixels.current.values()];
-    pendingPixels.current.clear();
-    if (changes.length === 0) return;
+    if (
+      flushInFlight.current ||
+      clearQueued.current ||
+      pendingPixels.current.size === 0
+    ) {
+      return;
+    }
 
-    setStatus("Saving…");
-    try {
-      await enqueueWrite(() =>
-        postCanvas({
+    flushInFlight.current = true;
+    void enqueueWrite(async () => {
+      while (pendingPixels.current.size > 0 && !clearQueued.current) {
+        const changes = [...pendingPixels.current.values()].slice(
+          0,
+          MAX_AGENT_PIXELS,
+        );
+        await postCanvas({
           action: "paint",
           participant: identity,
           cursor: cursor.current,
           status: null,
           pixels: changes,
-        }),
-      );
-      setStatus("Live");
-    } catch {
-      for (const change of changes) {
-        pendingPixels.current.set(pixelKey(change.x, change.y), change);
+        });
+
+        for (const change of changes) {
+          const key = pixelKey(change.x, change.y);
+          if (pendingPixels.current.get(key)?.color === change.color) {
+            pendingPixels.current.delete(key);
+          }
+        }
       }
-      setStatus("Reconnecting…");
-    }
-  }, [enqueueWrite, identity]);
+    })
+      .then(markLive)
+      .catch(() => {
+        setStatus("Reconnecting…");
+      })
+      .finally(() => {
+        flushInFlight.current = false;
+        if (
+          pendingPixels.current.size > 0 &&
+          !clearQueued.current &&
+          !flushTimer.current
+        ) {
+          flushTimer.current = setTimeout(() => {
+            flushTimer.current = null;
+            flushPixelsRef.current();
+          }, 250);
+        }
+      });
+  }, [enqueueWrite, identity, markLive]);
+
+  useEffect(() => {
+    flushPixelsRef.current = flushPixels;
+  }, [flushPixels]);
 
   const queuePixels = useCallback(
     (changes: PixelChange[], immediately = false) => {
-      setPixels((current) => applyPixelChanges(current, changes));
+      mutatePixelChanges(pixelsRef.current, changes);
+      publishPixels(immediately);
       for (const change of changes) {
         pendingPixels.current.set(pixelKey(change.x, change.y), change);
       }
 
       if (immediately) {
-        void flushPixels();
+        flushPixels();
       } else if (!flushTimer.current) {
-        flushTimer.current = setTimeout(() => void flushPixels(), 45);
+        flushTimer.current = setTimeout(flushPixels, 32);
       }
     },
-    [flushPixels],
+    [flushPixels, publishPixels],
   );
 
-  const sendPresence = useCallback(
-    async (nextCursor: Point | null) => {
-      try {
-        await postCanvas({
-          action: "presence",
-          participant: identity,
-          cursor: nextCursor,
-          status: null,
-        });
-      } catch {
-        setStatus("Reconnecting…");
-      }
-    },
-    [identity],
-  );
+  const schedulePresence = useCallback((delay = 0) => {
+    if (presenceTimer.current) return;
+    presenceTimer.current = setTimeout(() => {
+      presenceTimer.current = null;
+      presenceFlush.current();
+    }, delay);
+  }, []);
+
+  const sendPresence = useCallback(async () => {
+    if (presenceInFlight.current) {
+      presenceDirty.current = true;
+      return;
+    }
+
+    presenceInFlight.current = true;
+    presenceDirty.current = false;
+    try {
+      await postCanvas({
+        action: "presence",
+        participant: identity,
+        cursor: cursor.current,
+        status: null,
+      });
+      markLive();
+    } catch {
+      setStatus("Reconnecting…");
+      presenceDirty.current = true;
+    } finally {
+      presenceInFlight.current = false;
+      if (presenceDirty.current) schedulePresence(32);
+    }
+  }, [identity, markLive, schedulePresence]);
+
+  useEffect(() => {
+    presenceFlush.current = () => void sendPresence();
+  }, [sendPresence]);
 
   const updateCursor = useCallback(
     (nextCursor: Point | null) => {
       cursor.current = nextCursor;
-      if (presenceTimer.current) clearTimeout(presenceTimer.current);
-      presenceTimer.current = setTimeout(() => {
-        presenceTimer.current = null;
-        void sendPresence(cursor.current);
-      }, 80);
+      presenceDirty.current = true;
+      if (!presenceInFlight.current) schedulePresence();
     },
-    [sendPresence],
+    [schedulePresence],
+  );
+
+  const updateParticipant = useCallback((participant: StoredParticipant) => {
+    setParticipants((current) => [
+      ...current.filter(({ id }) => id !== participant.id),
+      participant,
+    ]);
+  }, []);
+
+  const applyRealtimePixels = useCallback(
+    (event: Extract<CanvasEvent, { type: "pixels" }>) => {
+      if (event.revision <= revision.current) return;
+      const missedRevision = event.revision > revision.current + 1;
+      revision.current = event.revision;
+      const changes = event.pixels.map(
+        ([x, y, color]): PixelChange => ({ x, y, color }),
+      );
+      mutatePixelChanges(pixelsRef.current, changes);
+      mutatePixelChanges(
+        pixelsRef.current,
+        [...pendingPixels.current.values()],
+      );
+      publishPixels();
+      updateParticipant(event.participant);
+      markLive();
+      if (missedRevision) {
+        void fetchSnapshot().catch(() => setStatus("Reconnecting…"));
+      }
+    },
+    [fetchSnapshot, markLive, publishPixels, updateParticipant],
   );
 
   useEffect(() => {
     let active = true;
     void fetchSnapshot().catch(() => setStatus("Reconnecting…"));
-    const initialPresence = setTimeout(() => void sendPresence(null), 0);
+    const initialPresence = setTimeout(() => {
+      presenceDirty.current = true;
+      schedulePresence();
+    }, 0);
 
     const events = new EventSource("/api/canvas/events");
     events.onmessage = (message) => {
       if (!active) return;
-      const event = JSON.parse(message.data) as CanvasEvent;
+      let event: CanvasEvent;
+      try {
+        event = JSON.parse(message.data) as CanvasEvent;
+      } catch {
+        return;
+      }
 
       if (event.type === "refresh") {
         void fetchSnapshot().catch(() => setStatus("Reconnecting…"));
+      } else if (event.type === "ready") {
+        void (async () => {
+          await snapshotRequest.current?.catch(() => {});
+          await fetchSnapshot();
+          if (!active) return;
+          eventsReady.current = true;
+          markLive();
+        })().catch(() => setStatus("Reconnecting…"));
+      } else if (event.type === "pixels") {
+        applyRealtimePixels(event);
+      } else if (event.type === "clear") {
+        if (event.revision <= revision.current) return;
+        const missedRevision = event.revision > revision.current + 1;
+        revision.current = event.revision;
+        pixelsRef.current = {};
+        mutatePixelChanges(
+          pixelsRef.current,
+          [...pendingPixels.current.values()],
+        );
+        publishPixels(true);
+        markLive();
+        if (missedRevision) {
+          void fetchSnapshot().catch(() => setStatus("Reconnecting…"));
+        }
       } else if (event.type === "presence") {
-        setParticipants((current) => [
-          ...current.filter(({ id }) => id !== event.participant.id),
-          event.participant,
-        ]);
-        setStatus("Live");
+        updateParticipant(event.participant);
+        markLive();
       }
     };
-    events.onerror = () => setStatus("Reconnecting…");
+    events.onerror = () => {
+      eventsReady.current = false;
+      setStatus("Reconnecting…");
+    };
 
     const heartbeat = setInterval(() => {
-      void sendPresence(cursor.current);
-      if (pendingPixels.current.size > 0) void flushPixels();
+      presenceDirty.current = true;
+      schedulePresence();
+      if (pendingPixels.current.size > 0) flushPixels();
     }, 5_000);
     const fallbackRefresh = setInterval(
       () => void fetchSnapshot().catch(() => setStatus("Reconnecting…")),
-      5_000,
+      30_000,
     );
     const removeExpired = setInterval(() => {
       const now = Date.now();
@@ -278,8 +467,17 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
       clearInterval(removeExpired);
       if (flushTimer.current) clearTimeout(flushTimer.current);
       if (presenceTimer.current) clearTimeout(presenceTimer.current);
+      if (renderFrame.current !== null) cancelAnimationFrame(renderFrame.current);
     };
-  }, [fetchSnapshot, flushPixels, sendPresence]);
+  }, [
+    applyRealtimePixels,
+    fetchSnapshot,
+    flushPixels,
+    markLive,
+    publishPixels,
+    schedulePresence,
+    updateParticipant,
+  ]);
 
   const beginStroke = useCallback(() => {
     activeStroke.current = new Map();
@@ -287,26 +485,25 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
 
   const paintPixel = useCallback(
     (change: PixelChange) => {
-      setPixels((current) => {
-        const key = pixelKey(change.x, change.y);
-        const before = current[key] ?? null;
-        const after = change.color === "transparent" ? null : change.color;
-        if (before === after) return current;
+      const key = pixelKey(change.x, change.y);
+      const before = pixelsRef.current[key] ?? null;
+      const after = change.color === "transparent" ? null : change.color;
+      if (before === after) return;
 
-        const stroke = activeStroke.current;
-        if (stroke) {
-          const existing = stroke.get(key);
-          stroke.set(key, { key, before: existing?.before ?? before, after });
-        }
+      const stroke = activeStroke.current;
+      if (stroke) {
+        const existing = stroke.get(key);
+        stroke.set(key, { key, before: existing?.before ?? before, after });
+      }
 
-        return applyPixelChanges(current, [change]);
-      });
-      pendingPixels.current.set(pixelKey(change.x, change.y), change);
+      mutatePixelChanges(pixelsRef.current, [change]);
+      publishPixels();
+      pendingPixels.current.set(key, change);
       if (!flushTimer.current) {
-        flushTimer.current = setTimeout(() => void flushPixels(), 45);
+        flushTimer.current = setTimeout(flushPixels, 32);
       }
     },
-    [flushPixels],
+    [flushPixels, publishPixels],
   );
 
   const endStroke = useCallback(() => {
@@ -316,7 +513,7 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
       setUndoStack((current) => [...current, changes]);
       setRedoStack([]);
     }
-    void flushPixels();
+    flushPixels();
   }, [flushPixels]);
 
   const undo = useCallback(() => {
@@ -336,25 +533,33 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
   }, [queuePixels, redoStack]);
 
   const clear = useCallback(() => {
-    const changes = Object.entries(pixels).map(([key, color]) => ({
+    const changes = Object.entries(pixelsRef.current).map(([key, color]) => ({
       key,
       before: color,
       after: null,
     }));
     if (changes.length === 0) return;
 
+    clearQueued.current = true;
     pendingPixels.current.clear();
-    setPixels({});
+    pixelsRef.current = {};
+    publishPixels(true);
     setUndoStack((current) => [...current, changes]);
     setRedoStack([]);
     setStatus("Saving…");
     void enqueueWrite(() => postCanvas({ action: "clear", participant: identity }))
-      .then(() => setStatus("Live"))
+      .then(() => {
+        clearQueued.current = false;
+        markLive();
+        if (pendingPixels.current.size > 0) flushPixelsRef.current();
+      })
       .catch(() => {
+        clearQueued.current = false;
         setStatus("Reconnecting…");
         void fetchSnapshot();
+        if (pendingPixels.current.size > 0) flushPixelsRef.current();
       });
-  }, [enqueueWrite, fetchSnapshot, identity, pixels]);
+  }, [enqueueWrite, fetchSnapshot, identity, markLive, publishPixels]);
 
   const activeParticipants = participants;
 
