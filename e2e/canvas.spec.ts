@@ -113,6 +113,24 @@ test("renders a stroke before its network save completes", async ({
   await clearSharedCanvas(request);
 });
 
+test("fills a continuous stroke between sparse held-pointer samples", async ({
+  page,
+  request,
+}) => {
+  await clearSharedCanvas(request);
+  await page.goto("/");
+  await expect(page.locator(".sync-status")).toHaveText("Live");
+
+  await page.getByRole("button", { name: "Gold", exact: true }).click();
+  await page.mouse.move(980, 180);
+  await page.mouse.down();
+  await page.mouse.move(1120, 300);
+  await page.mouse.up();
+
+  await expect.poll(() => paintedPixelCount(page)).toBeGreaterThan(8);
+  await clearSharedCanvas(request);
+});
+
 test("synchronizes another visitor's pixels and cursor", async ({
   browser,
   request,

@@ -16,6 +16,7 @@ import {
   PALETTE,
   parsePixelKey,
   pointFromViewport,
+  pointsOnLine,
   type CanvasColor,
   type PixelChange,
   type Point,
@@ -170,7 +171,7 @@ export function PaintingSurface({
 }: PaintingSurfaceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const activePointer = useRef<number | null>(null);
-  const lastPixel = useRef<string | null>(null);
+  const lastPaintedPoint = useRef<Point | null>(null);
   const [selectedColor, setSelectedColor] = useState<CanvasColor | null>(null);
 
   useEffect(() => {
@@ -220,15 +221,22 @@ export function PaintingSurface({
     [],
   );
 
-  const paintAt = useCallback(
+  const paintThrough = useCallback(
     (point: Point) => {
       if (!selectedColor) return;
-      const key = `${point.x}:${point.y}:${selectedColor}`;
-      if (lastPixel.current === key) return;
-      lastPixel.current = key;
-      const change = { ...point, color: selectedColor } satisfies PixelChange;
-      drawPixel(canvasRef.current, change);
-      onPaintPixel(change);
+      const previous = lastPaintedPoint.current;
+      if (previous?.x === point.x && previous.y === point.y) return;
+
+      const points = previous ? pointsOnLine(previous, point) : [point];
+      for (const paintedPoint of points) {
+        const change = {
+          ...paintedPoint,
+          color: selectedColor,
+        } satisfies PixelChange;
+        drawPixel(canvasRef.current, change);
+        onPaintPixel(change);
+      }
+      lastPaintedPoint.current = point;
     },
     [onPaintPixel, selectedColor],
   );
@@ -236,25 +244,38 @@ export function PaintingSurface({
   const handlePointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (event.button !== 0 || !selectedColor) return;
     activePointer.current = event.pointerId;
-    lastPixel.current = null;
+    lastPaintedPoint.current = null;
     event.currentTarget.setPointerCapture(event.pointerId);
     onStrokeStart();
     const point = pointForEvent(event);
     onCursorChange(point);
-    paintAt(point);
+    paintThrough(point);
     event.preventDefault();
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     const point = pointForEvent(event);
     onCursorChange(point);
-    if (activePointer.current === event.pointerId) paintAt(point);
+    if (activePointer.current !== event.pointerId) return;
+
+    const samples = event.nativeEvent.getCoalescedEvents?.() ?? [event.nativeEvent];
+    for (const sample of samples) {
+      paintThrough(
+        pointFromViewport(
+          sample.clientX,
+          sample.clientY,
+          window.innerWidth,
+          window.innerHeight,
+        ),
+      );
+    }
   };
 
   const finishPointer = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (activePointer.current !== event.pointerId) return;
+    paintThrough(pointForEvent(event));
     activePointer.current = null;
-    lastPixel.current = null;
+    lastPaintedPoint.current = null;
     onStrokeEnd();
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);

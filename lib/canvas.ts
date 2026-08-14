@@ -109,6 +109,32 @@ export function pointFromViewport(
   };
 }
 
+export function pointsOnLine(start: Point, end: Point): Point[] {
+  const points: Point[] = [];
+  let x = start.x;
+  let y = start.y;
+  const deltaX = Math.abs(end.x - start.x);
+  const deltaY = Math.abs(end.y - start.y);
+  const stepX = start.x < end.x ? 1 : -1;
+  const stepY = start.y < end.y ? 1 : -1;
+  let error = deltaX - deltaY;
+
+  while (true) {
+    points.push({ x, y });
+    if (x === end.x && y === end.y) return points;
+
+    const doubledError = error * 2;
+    if (doubledError > -deltaY) {
+      error -= deltaY;
+      x += stepX;
+    }
+    if (doubledError < deltaX) {
+      error += deltaX;
+      y += stepY;
+    }
+  }
+}
+
 export function participantColor(value: string) {
   const colors = [
     "#e63946",
