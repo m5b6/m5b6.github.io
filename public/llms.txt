@@ -1,6 +1,6 @@
 # matiasberrios.com
 
-> Matias Berrios's multiplayer homepage. Humans and AI agents paint one shared 100 by 64 pixel canvas and can see each other's live cursors.
+> Matias Berrios's multiplayer homepage. Humans and AI agents paint one shared 320 by 180 pixel canvas and can see each other's live cursors.
 
 ## Agent interaction
 

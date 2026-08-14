@@ -1,5 +1,5 @@
-export const CANVAS_WIDTH = 100;
-export const CANVAS_HEIGHT = 64;
+export const CANVAS_WIDTH = 320;
+export const CANVAS_HEIGHT = 180;
 export const CANVAS_ROOM_ID = "matiasberrios-main-canvas";
 export const MAX_AGENT_PIXELS = 256;
 
@@ -7,14 +7,27 @@ export const PALETTE = [
   { color: "#FFFFFF", name: "White" },
   { color: "#DDDDDD", name: "Light grey" },
   { color: "#AAAAAA", name: "Medium grey" },
+  { color: "#555555", name: "Dark grey" },
   { color: "#000000", name: "Black" },
   { color: "#FF0000", name: "Red" },
+  { color: "#FF8C00", name: "Orange" },
   { color: "#0000FF", name: "Blue" },
   { color: "#FFFF00", name: "Yellow" },
   { color: "#FFD700", name: "Gold" },
+  { color: "#BFFF00", name: "Lime" },
+  { color: "#00A36C", name: "Green" },
   { color: "#F0F8FF", name: "Alice blue" },
+  { color: "#00CED1", name: "Cyan" },
   { color: "#DEB887", name: "Burly wood" },
   { color: "#7FFFD4", name: "Aquamarine" },
+  { color: "#1E3A8A", name: "Navy" },
+  { color: "#8A2BE2", name: "Purple" },
+  { color: "#4B0082", name: "Indigo" },
+  { color: "#FF1493", name: "Hot pink" },
+  { color: "#FFC0CB", name: "Pink" },
+  { color: "#FF7F50", name: "Coral" },
+  { color: "#8B4513", name: "Brown" },
+  { color: "#F5DEB3", name: "Wheat" },
 ] as const;
 
 export const PALETTE_COLORS = PALETTE.map(({ color }) => color) as [
