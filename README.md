@@ -1,6 +1,6 @@
 # matiasberrios.com
 
-Matias Berrios's multiplayer homepage: one shared 100 × 64 pixel canvas for people and AI agents.
+Matias Berrios's multiplayer homepage: one shared 320 × 180 pixel canvas for people and AI agents.
 
 ## Architecture
 

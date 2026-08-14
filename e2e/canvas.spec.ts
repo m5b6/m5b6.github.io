@@ -4,6 +4,19 @@ import {
   type APIRequestContext,
   type Page,
 } from "@playwright/test";
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  pointFromViewport,
+} from "../lib/canvas";
+
+const desktopViewport = { width: 1280, height: 720 };
+const multiplayerTarget = pointFromViewport(
+  1180,
+  650,
+  desktopViewport.width,
+  desktopViewport.height,
+);
 
 const testParticipant = {
   id: "playwright-cleanup",
@@ -136,8 +149,8 @@ test("synchronizes another visitor's pixels and cursor", async ({
   request,
 }) => {
   await clearSharedCanvas(request);
-  const firstContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
-  const secondContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  const firstContext = await browser.newContext({ viewport: desktopViewport });
+  const secondContext = await browser.newContext({ viewport: desktopViewport });
   const first = await firstContext.newPage();
   const second = await secondContext.newPage();
   let secondSnapshotReads = 0;
@@ -159,10 +172,13 @@ test("synchronizes another visitor's pixels and cursor", async ({
 
   await expect
     .poll(() =>
-      second.locator("canvas").evaluate((canvas: HTMLCanvasElement) => {
-        const context = canvas.getContext("2d")!;
-        return Array.from(context.getImageData(92, 57, 1, 1).data);
-      }),
+      second.locator("canvas").evaluate(
+        (canvas: HTMLCanvasElement, target: { x: number; y: number }) => {
+          const context = canvas.getContext("2d")!;
+          return Array.from(context.getImageData(target.x, target.y, 1, 1).data);
+        },
+        multiplayerTarget,
+      ),
       { intervals: [25, 50, 100], timeout: 1_500 },
     )
     .toEqual([0, 0, 255, 255]);
@@ -177,6 +193,82 @@ test("synchronizes another visitor's pixels and cursor", async ({
   });
 
   await Promise.all([firstContext.close(), secondContext.close()]);
+  await clearSharedCanvas(request);
+});
+
+test("offers a huge canvas, brushes, colors, and playful paint modes", async ({
+  page,
+  request,
+}) => {
+  await clearSharedCanvas(request);
+  await page.goto("/");
+  await expect(page.locator(".sync-status")).toHaveText("Live");
+  await expect(page.locator("canvas")).toHaveJSProperty("width", CANVAS_WIDTH);
+  await expect(page.locator("canvas")).toHaveJSProperty("height", CANVAS_HEIGHT);
+
+  await page.getByRole("button", { name: "Big marker" }).click();
+  await page.getByRole("button", { name: "Hot pink" }).click();
+  await page.mouse.click(1180, 650);
+  await expect.poll(() => paintedPixelCount(page)).toBeGreaterThan(15);
+
+  await page.getByRole("button", { name: "Pixel brush" }).click();
+  await page.getByRole("button", { name: "Purple" }).click();
+  await page.getByRole("button", { name: /mirror/i }).click();
+  await page.mouse.click(1050, 610);
+  const mirroredTarget = pointFromViewport(
+    1050,
+    610,
+    desktopViewport.width,
+    desktopViewport.height,
+  );
+  await expect
+    .poll(() =>
+      page.locator("canvas").evaluate(
+        (
+          canvas: HTMLCanvasElement,
+          {
+            target,
+            canvasWidth,
+          }: { target: { x: number; y: number }; canvasWidth: number },
+        ) => {
+          const context = canvas.getContext("2d")!;
+          return [target.x, canvasWidth - 1 - target.x].map((x) =>
+            Array.from(context.getImageData(x, target.y, 1, 1).data),
+          );
+        },
+        { target: mirroredTarget, canvasWidth: CANVAS_WIDTH },
+      ),
+    )
+    .toEqual([
+      [138, 43, 226, 255],
+      [138, 43, 226, 255],
+    ]);
+
+  await page.getByRole("button", { name: /rainbow/i }).click();
+  await page.mouse.click(1000, 600);
+  const rainbowTarget = pointFromViewport(
+    1000,
+    600,
+    desktopViewport.width,
+    desktopViewport.height,
+  );
+  const rainbowPair = await page.locator("canvas").evaluate(
+    (
+      canvas: HTMLCanvasElement,
+      {
+        target,
+        canvasWidth,
+      }: { target: { x: number; y: number }; canvasWidth: number },
+    ) => {
+      const context = canvas.getContext("2d")!;
+      return [target.x, canvasWidth - 1 - target.x].map((x) =>
+        Array.from(context.getImageData(x, target.y, 1, 1).data).join(","),
+      );
+    },
+    { target: rainbowTarget, canvasWidth: CANVAS_WIDTH },
+  );
+  expect(rainbowPair[0]).not.toBe(rainbowPair[1]);
+
   await clearSharedCanvas(request);
 });
 
