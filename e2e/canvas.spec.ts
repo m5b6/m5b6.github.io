@@ -288,7 +288,9 @@ test("keeps controls usable on desktop and mobile", async ({ page }) => {
 test("publishes agent discovery files", async ({ request }) => {
   const instructions = await request.get("/llms.txt");
   expect(instructions.ok()).toBeTruthy();
-  expect(await instructions.text()).toContain("MCP endpoint");
+  const instructionText = await instructions.text();
+  expect(instructionText).toContain("MCP endpoint");
+  expect(instructionText).toContain("Canvas bounds: x=0..319, y=0..179");
 
   const configuration = await request.get("/mcp.json");
   expect(configuration.ok()).toBeTruthy();
