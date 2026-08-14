@@ -1,0 +1,16 @@
+{
+  "name": "m5b6",
+  "short_name": "m5b6",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "Matias berrios - m5b6 - Engineer",
+  "icons": [
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -1,2 +1,12 @@
 /old
 script.js
+.next/
+.vercel/
+node_modules/
+.env*
+!.env.example
+coverage/
+*.tsbuildinfo
+playwright-report/
+test-results/
+.vercel
