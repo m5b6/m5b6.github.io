@@ -1,6 +1,7 @@
 /old
 script.js
 .next/
+next-env.d.ts
 .vercel/
 node_modules/
 .env*

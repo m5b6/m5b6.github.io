@@ -9,6 +9,10 @@ import {
   CANVAS_WIDTH,
   pointFromViewport,
 } from "../lib/canvas";
+import { assertDisposableRoom } from "../lib/canvas-room";
+
+/** This spec clears the shared canvas. Never let it reach production art. */
+assertDisposableRoom();
 
 const desktopViewport = { width: 1280, height: 720 };
 const multiplayerTarget = pointFromViewport(
@@ -67,8 +71,11 @@ test("paints, undoes, redoes, and clears a shared stroke", async ({
   await page.getByRole("button", { name: "Redo" }).click();
   await expect.poll(() => paintedPixelCount(page)).toBeGreaterThan(5);
 
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Clear" }).click();
+  const clearAlert = page.getByRole("alertdialog", { name: "Clear the canvas" });
+  await expect(clearAlert).toBeVisible();
+  await clearAlert.getByRole("button", { name: "Clear", exact: true }).click();
+  await expect(clearAlert).toBeHidden();
   await expect.poll(() => paintedPixelCount(page)).toBe(0);
   await expect
     .poll(async () => {

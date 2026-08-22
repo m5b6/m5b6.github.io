@@ -2,6 +2,8 @@ export const CANVAS_WIDTH = 320;
 export const CANVAS_HEIGHT = 180;
 export const CANVAS_ROOM_ID = "matiasberrios-main-canvas";
 export const MAX_AGENT_PIXELS = 256;
+export const AGENT_CURSOR_SECONDS = 30;
+export const ERASE_COLOR = "transparent";
 
 export const PALETTE = [
   { color: "#FFFFFF", name: "White" },
@@ -37,7 +39,9 @@ export const PALETTE_COLORS = PALETTE.map(({ color }) => color) as [
 
 export type ParticipantKind = "human" | "agent";
 export type Point = { x: number; y: number };
-export type CanvasColor = (typeof PALETTE)[number]["color"] | "transparent";
+export type CanvasColor =
+  | (typeof PALETTE)[number]["color"]
+  | typeof ERASE_COLOR;
 
 export type ParticipantPresence = {
   cursor: Point | null;
@@ -120,6 +124,31 @@ export function pointFromViewport(
       Math.max(0, Math.floor((clientY / height) * CANVAS_HEIGHT)),
     ),
   };
+}
+
+export type CanvasRect = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+/**
+ * The canvas keeps its 320:180 aspect and letterboxes, so pointer coordinates map
+ * against the element's own box. When the viewport already matches that aspect the
+ * box fills it and this agrees with pointFromViewport exactly.
+ */
+export function pointFromRect(
+  clientX: number,
+  clientY: number,
+  rect: CanvasRect,
+): Point {
+  return pointFromViewport(
+    clientX - rect.left,
+    clientY - rect.top,
+    rect.width,
+    rect.height,
+  );
 }
 
 export function pointsOnLine(start: Point, end: Point): Point[] {

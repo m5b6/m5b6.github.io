@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import {
   MAX_AGENT_PIXELS,
   parsePixelKey,
@@ -14,12 +14,69 @@ import {
   type PixelTuple,
   type Point,
   type StoredParticipant,
+  type VisibleParticipant,
 } from "@/lib/canvas";
 import { PaintingSurface } from "@/components/painting-surface";
+
+export type PaintSession = {
+  identity: ParticipantIdentity;
+  pixels: Readonly<Record<string, string>>;
+  participants: VisibleParticipant[];
+  onlineCount: number;
+  status: string;
+  setupNotice?: string;
+  /** Bumped whenever the shared canvas is emptied or refilled, so the Trash can reload. */
+  trashToken: number;
+  onCursorChange: (cursor: Point | null) => void;
+  onStrokeStart: () => void;
+  onPaintPixel: (change: PixelChange) => void;
+  onStrokeEnd: () => void;
+  onUndo: () => void;
+  onRedo: () => void;
+  onClear: () => void;
+  onRefresh: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
+};
+
+export type PaintSurfaceProps = { session: PaintSession };
+export type PaintSurfaceComponent = ComponentType<PaintSurfaceProps>;
+
+const NOOP = () => {};
+
+const LOCAL_IDENTITY: ParticipantIdentity = {
+  id: "local-preview",
+  name: "Guest",
+  color: "#000000",
+  kind: "human",
+};
+
+function LegacyPaintSurface({ session }: PaintSurfaceProps) {
+  return (
+    <PaintingSurface
+      pixels={session.pixels}
+      participants={session.participants}
+      onlineCount={session.onlineCount}
+      status={session.status}
+      setupNotice={session.setupNotice}
+      onCursorChange={session.onCursorChange}
+      onStrokeStart={session.onStrokeStart}
+      onPaintPixel={session.onPaintPixel}
+      onStrokeEnd={session.onStrokeEnd}
+      onUndo={session.onUndo}
+      onRedo={session.onRedo}
+      onClear={session.onClear}
+      canUndo={session.canUndo}
+      canRedo={session.canRedo}
+    />
+  );
+}
 
 type PaintingExperienceProps = {
   initialKind: ParticipantKind;
   multiplayerEnabled: boolean;
+  /** The shell passes its own surface; the default is the pre-desktop layout. */
+  surface?: PaintSurfaceComponent;
 };
 
 type StrokeChange = {
@@ -129,6 +186,7 @@ function historyPixels(changes: StrokeChange[], direction: "before" | "after") {
 export function PaintingExperience({
   initialKind,
   multiplayerEnabled,
+  surface: Surface = LegacyPaintSurface,
 }: PaintingExperienceProps) {
   const [identity, setIdentity] = useState<ParticipantIdentity | null>(null);
 
@@ -142,18 +200,25 @@ export function PaintingExperience({
   }
 
   if (!multiplayerEnabled) {
-    return <LocalPaintingRoom />;
+    return <LocalPaintingRoom surface={Surface} />;
   }
 
-  return <SharedPaintingRoom identity={identity} />;
+  return <SharedPaintingRoom identity={identity} surface={Surface} />;
 }
 
-function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
+function SharedPaintingRoom({
+  identity,
+  surface: Surface,
+}: {
+  identity: ParticipantIdentity;
+  surface: PaintSurfaceComponent;
+}) {
   const [pixels, setPixels] = useState<Readonly<Record<string, string>>>({});
   const [participants, setParticipants] = useState<StoredParticipant[]>([]);
   const [status, setStatus] = useState("Connecting…");
   const [undoStack, setUndoStack] = useState<StrokeChange[][]>([]);
   const [redoStack, setRedoStack] = useState<StrokeChange[][]>([]);
+  const [trashToken, setTrashToken] = useState(0);
   const pixelsRef = useRef<Record<string, string>>({});
   const revision = useRef(0);
   const activeStroke = useRef<Map<string, StrokeChange> | null>(null);
@@ -407,6 +472,7 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
       }
 
       if (event.type === "refresh") {
+        setTrashToken((current) => current + 1);
         void fetchSnapshot().catch(() => setStatus("Reconnecting…"));
       } else if (event.type === "ready") {
         void (async () => {
@@ -419,6 +485,7 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
       } else if (event.type === "pixels") {
         applyRealtimePixels(event);
       } else if (event.type === "clear") {
+        setTrashToken((current) => current + 1);
         if (event.revision <= revision.current) return;
         const missedRevision = event.revision > revision.current + 1;
         revision.current = event.revision;
@@ -550,6 +617,7 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
     void enqueueWrite(() => postCanvas({ action: "clear", participant: identity }))
       .then(() => {
         clearQueued.current = false;
+        setTrashToken((current) => current + 1);
         markLive();
         if (pendingPixels.current.size > 0) flushPixelsRef.current();
       })
@@ -562,27 +630,36 @@ function SharedPaintingRoom({ identity }: { identity: ParticipantIdentity }) {
   }, [enqueueWrite, fetchSnapshot, identity, markLive, publishPixels]);
 
   const activeParticipants = participants;
+  const refresh = useCallback(() => {
+    setTrashToken((current) => current + 1);
+    void fetchSnapshot().catch(() => setStatus("Reconnecting…"));
+  }, [fetchSnapshot]);
 
   return (
-    <PaintingSurface
-      pixels={pixels}
-      participants={activeParticipants.filter(({ id }) => id !== identity.id)}
-      onlineCount={Math.max(1, activeParticipants.length)}
-      status={status}
-      onCursorChange={updateCursor}
-      onStrokeStart={beginStroke}
-      onPaintPixel={paintPixel}
-      onStrokeEnd={endStroke}
-      onUndo={undo}
-      onRedo={redo}
-      onClear={clear}
-      canUndo={undoStack.length > 0}
-      canRedo={redoStack.length > 0}
+    <Surface
+      session={{
+        identity,
+        pixels,
+        participants: activeParticipants.filter(({ id }) => id !== identity.id),
+        onlineCount: Math.max(1, activeParticipants.length),
+        status,
+        trashToken,
+        onCursorChange: updateCursor,
+        onStrokeStart: beginStroke,
+        onPaintPixel: paintPixel,
+        onStrokeEnd: endStroke,
+        onUndo: undo,
+        onRedo: redo,
+        onClear: clear,
+        onRefresh: refresh,
+        canUndo: undoStack.length > 0,
+        canRedo: redoStack.length > 0,
+      }}
     />
   );
 }
 
-function LocalPaintingRoom() {
+function LocalPaintingRoom({ surface: Surface }: { surface: PaintSurfaceComponent }) {
   const [pixels, setPixels] = useState<Readonly<Record<string, string>>>({});
   const [undoStack, setUndoStack] = useState<StrokeChange[][]>([]);
   const [redoStack, setRedoStack] = useState<StrokeChange[][]>([]);
@@ -656,21 +733,26 @@ function LocalPaintingRoom() {
   }, [pixels]);
 
   return (
-    <PaintingSurface
-      pixels={pixels}
-      participants={[]}
-      onlineCount={1}
-      status="Local preview"
-      setupNotice="Add DATABASE_URL to turn on multiplayer."
-      onCursorChange={() => {}}
-      onStrokeStart={beginStroke}
-      onPaintPixel={paintPixel}
-      onStrokeEnd={endStroke}
-      onUndo={undo}
-      onRedo={redo}
-      onClear={clear}
-      canUndo={undoStack.length > 0}
-      canRedo={redoStack.length > 0}
+    <Surface
+      session={{
+        identity: LOCAL_IDENTITY,
+        pixels,
+        participants: [],
+        onlineCount: 1,
+        status: "Local preview",
+        setupNotice: "Add DATABASE_URL to turn on multiplayer.",
+        trashToken: 0,
+        onCursorChange: NOOP,
+        onStrokeStart: beginStroke,
+        onPaintPixel: paintPixel,
+        onStrokeEnd: endStroke,
+        onUndo: undo,
+        onRedo: redo,
+        onClear: clear,
+        onRefresh: NOOP,
+        canUndo: undoStack.length > 0,
+        canRedo: redoStack.length > 0,
+      }}
     />
   );
 }

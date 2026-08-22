@@ -1,0 +1,68 @@
+/* The only file in this repository allowed to name a colour. Everything else references a token. */
+
+:root {
+  --mac-art-ink: var(--mac-ink);
+  --mac-art-paper: var(--mac-paper);
+
+  --mac-black: #000000;
+  --mac-white: #ffffff;
+  --mac-gray-inactive: #a5a5a5;
+  --mac-gray-disabled: #b6b7b8;
+
+  --mac-ink: var(--mac-black);
+  --mac-paper: var(--mac-white);
+  --mac-ink-inverted: var(--mac-white);
+  --mac-paper-inverted: var(--mac-black);
+
+  --mac-font-chicago: Chicago_12, Chicago, Geneva, "Helvetica Neue", sans-serif;
+  --mac-font-display: Chicago, Chicago_12, Geneva, sans-serif;
+  --mac-font-geneva: Geneva_9, Geneva, Chicago_12, sans-serif;
+  --mac-font-monaco: Monaco, Geneva_9, Chicago_12, sans-serif;
+  --mac-font-mono: Menlo, Consolas, "Courier New", monospace;
+
+  --mac-text-small: 16px;
+  --mac-text-base: 16px;
+  --mac-text-title: 16px;
+  --mac-text-display: 24px;
+
+  --mac-leading-base: 1.15;
+
+  --mac-space-2: 2px;
+  --mac-space-4: 4px;
+  --mac-space-6: 6px;
+  --mac-space-8: 8px;
+  --mac-space-10: 10px;
+  --mac-space-12: 12px;
+  --mac-space-16: 16px;
+  --mac-space-20: 20px;
+  --mac-space-24: 24px;
+  --mac-space-32: 32px;
+
+  --mac-hairline: 1px;
+  --mac-border: var(--mac-hairline) solid var(--mac-ink);
+  --mac-border-heavy: 2px solid var(--mac-ink);
+  --mac-radius: 0;
+
+  --mac-shadow: 2px 2px 0 0 var(--mac-ink);
+
+  --mac-menu-bar-height: 20px;
+  --mac-title-bar-height: 20px;
+  --mac-title-button: 11px;
+  --mac-status-bar-height: 20px;
+  --mac-scrollbar: 15px;
+  --mac-icon-size: 32px;
+  --mac-icon-cell: 64px;
+  --mac-desktop-gutter: 30px;
+  --mac-desktop-icons-height: 260px;
+
+  --mac-dither-50: repeating-conic-gradient(
+    var(--mac-ink) 0% 25%,
+    var(--mac-paper) 0% 50%
+  );
+  --mac-dither-cell: 2px 2px;
+  --mac-stripe: repeating-linear-gradient(
+    -45deg,
+    var(--mac-ink) 0 2px,
+    var(--mac-paper) 2px 4px
+  );
+}

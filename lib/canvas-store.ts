@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import { Client, Pool } from "pg";
+import { Client, Pool, type PoolClient } from "pg";
 import {
   CANVAS_ROOM_ID,
   deduplicatePixels,
@@ -12,12 +12,19 @@ import {
   type Point,
   type StoredParticipant,
 } from "@/lib/canvas";
+import { runMigrations } from "@/lib/migrations";
+import { resolveRoomId } from "@/lib/canvas-room";
+import {
+  MAX_TRASH_ENTRIES,
+  type RestoreResult,
+  type TrashEntry,
+} from "@/lib/trash";
 
-const roomId =
-  process.env.CANVAS_ROOM_ID ??
-  (process.env.VERCEL_ENV === "production"
-    ? CANVAS_ROOM_ID
-    : `${CANVAS_ROOM_ID}:${process.env.VERCEL_ENV ?? "development"}`);
+type CanvasStoreEvent =
+  | { type: "clear"; revision: number }
+  | { type: "refresh"; revision: number };
+
+const roomId = resolveRoomId();
 const eventChannel = `matias_canvas_${createHash("sha256")
   .update(roomId)
   .digest("hex")
@@ -49,41 +56,7 @@ function pool() {
 }
 
 async function initializeSchema() {
-  await pool().query(`
-    CREATE TABLE IF NOT EXISTS canvas_pixels (
-      room_id text NOT NULL,
-      x smallint NOT NULL,
-      y smallint NOT NULL,
-      color varchar(16) NOT NULL,
-      updated_by text NOT NULL,
-      updated_at timestamptz NOT NULL DEFAULT NOW(),
-      PRIMARY KEY (room_id, x, y)
-    );
-
-    CREATE TABLE IF NOT EXISTS canvas_participants (
-      room_id text NOT NULL,
-      participant_id text NOT NULL,
-      name varchar(32) NOT NULL,
-      color varchar(16) NOT NULL,
-      kind varchar(8) NOT NULL,
-      status varchar(60),
-      cursor_x smallint,
-      cursor_y smallint,
-      last_seen timestamptz NOT NULL DEFAULT NOW(),
-      expires_at timestamptz NOT NULL,
-      PRIMARY KEY (room_id, participant_id)
-    );
-
-    CREATE INDEX IF NOT EXISTS canvas_participants_expiry
-      ON canvas_participants (room_id, expires_at);
-
-    CREATE TABLE IF NOT EXISTS canvas_meta (
-      room_id text PRIMARY KEY,
-      revision bigint NOT NULL DEFAULT 0,
-      updated_at timestamptz NOT NULL DEFAULT NOW()
-    );
-
-  `);
+  await runMigrations(pool());
   await pool().query(
     "INSERT INTO canvas_meta (room_id) VALUES ($1) ON CONFLICT (room_id) DO NOTHING",
     [roomId],
@@ -316,33 +289,215 @@ export async function writePixels(
   return Number(result.rows[0].revision);
 }
 
-export async function clearCanvas() {
+async function inTransaction<T>(run: (client: PoolClient) => Promise<T>) {
   await ensureCanvasSchema();
-  const result = await pool().query<{ revision: string }>(
+  const client = await pool().connect();
+
+  try {
+    await client.query("BEGIN");
+    const value = await run(client);
+    await client.query("COMMIT");
+    return value;
+  } catch (error) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function bumpRevision(client: PoolClient) {
+  const result = await client.query<{ revision: string }>(
     `
-      WITH cleared_pixels AS (
-        DELETE FROM canvas_pixels WHERE room_id = $1
-      ),
-      next_revision AS (
-        UPDATE canvas_meta
-        SET revision = revision + 1, updated_at = NOW()
-        WHERE room_id = $1
-        RETURNING revision
-      )
-      SELECT next_revision.revision,
-        pg_notify(
-          $2,
-          json_build_object(
-            'type', 'clear',
-            'revision', next_revision.revision
-          )::text
-        ) AS notified
-      FROM next_revision
+      UPDATE canvas_meta
+      SET revision = revision + 1, updated_at = NOW()
+      WHERE room_id = $1
+      RETURNING revision
     `,
-    [roomId, eventChannel],
+    [roomId],
   );
 
   return Number(result.rows[0].revision);
+}
+
+async function announce(client: PoolClient, event: CanvasStoreEvent) {
+  await client.query("SELECT pg_notify($1, $2)", [
+    eventChannel,
+    JSON.stringify(event),
+  ]);
+}
+
+/**
+ * Clearing moves the painting into the Trash instead of destroying it. The wire
+ * contract is unchanged: callers still receive the new revision and every live
+ * client still receives one `clear` event.
+ */
+export async function clearCanvas(discardedBy = "unknown") {
+  return inTransaction(async (client) => {
+    const revision = await bumpRevision(client);
+
+    await client.query(
+      `
+        INSERT INTO canvas_trash (room_id, revision, pixels, pixel_count, discarded_by)
+        SELECT
+          $1,
+          $2::bigint,
+          COALESCE(
+            jsonb_object_agg(
+              canvas_pixels.x::text || ':' || canvas_pixels.y::text,
+              canvas_pixels.color
+            ),
+            '{}'::jsonb
+          ),
+          COUNT(*)::int,
+          $3
+        FROM canvas_pixels
+        WHERE canvas_pixels.room_id = $1
+        HAVING COUNT(*) > 0
+        ON CONFLICT (room_id, revision) DO NOTHING
+      `,
+      [roomId, revision, discardedBy.slice(0, 80)],
+    );
+    await client.query("DELETE FROM canvas_pixels WHERE room_id = $1", [roomId]);
+    await announce(client, { type: "clear", revision });
+
+    return revision;
+  });
+}
+
+export async function listTrash(limit = MAX_TRASH_ENTRIES): Promise<TrashEntry[]> {
+  await ensureCanvasSchema();
+  const result = await pool().query<{
+    revision: string;
+    pixel_count: number;
+    discarded_by: string;
+    discarded_at: Date;
+  }>(
+    `
+      SELECT revision, pixel_count, discarded_by, discarded_at
+      FROM canvas_trash
+      WHERE room_id = $1
+      ORDER BY discarded_at DESC, revision DESC
+      LIMIT $2
+    `,
+    [roomId, Math.max(1, Math.min(MAX_TRASH_ENTRIES, limit))],
+  );
+
+  return result.rows.map((row) => ({
+    revision: Number(row.revision),
+    pixelCount: row.pixel_count,
+    discardedBy: row.discarded_by,
+    discardedAt: row.discarded_at.toISOString(),
+  }));
+}
+
+/**
+ * Put Back: the newest discarded painting returns to the canvas and leaves the
+ * Trash. Pixels painted after the clear are kept; the restored ones win ties.
+ */
+export async function restoreTrash(
+  restoredBy: string,
+  revision?: number,
+): Promise<RestoreResult> {
+  return inTransaction(async (client) => {
+    const discarded = await client.query<{ revision: string; pixel_count: number }>(
+      revision === undefined
+        ? `
+          SELECT revision, pixel_count FROM canvas_trash
+          WHERE room_id = $1
+          ORDER BY discarded_at DESC, revision DESC
+          LIMIT 1
+          FOR UPDATE
+        `
+        : `
+          SELECT revision, pixel_count FROM canvas_trash
+          WHERE room_id = $1 AND revision = $2::bigint
+          FOR UPDATE
+        `,
+      revision === undefined ? [roomId] : [roomId, revision],
+    );
+    const entry = discarded.rows[0];
+    if (!entry) return { restored: false as const };
+
+    await client.query(
+      `
+        INSERT INTO canvas_pixels (room_id, x, y, color, updated_by)
+        SELECT
+          $1,
+          split_part(restored.key, ':', 1)::smallint,
+          split_part(restored.key, ':', 2)::smallint,
+          restored.value,
+          $3
+        FROM canvas_trash
+        CROSS JOIN LATERAL jsonb_each_text(canvas_trash.pixels) AS restored(key, value)
+        WHERE canvas_trash.room_id = $1 AND canvas_trash.revision = $2::bigint
+        ON CONFLICT (room_id, x, y) DO UPDATE SET
+          color = EXCLUDED.color,
+          updated_by = EXCLUDED.updated_by,
+          updated_at = NOW()
+      `,
+      [roomId, entry.revision, restoredBy.slice(0, 80)],
+    );
+    await client.query(
+      "DELETE FROM canvas_trash WHERE room_id = $1 AND revision = $2::bigint",
+      [roomId, entry.revision],
+    );
+
+    const nextRevision = await bumpRevision(client);
+    await announce(client, { type: "refresh", revision: nextRevision });
+
+    return {
+      restored: true as const,
+      revision: nextRevision,
+      pixelCount: entry.pixel_count,
+    };
+  });
+}
+
+/** Empty Trash is the irreversible act. Nothing else in the shell destroys art. */
+export async function emptyTrash() {
+  await ensureCanvasSchema();
+  const result = await pool().query(
+    "DELETE FROM canvas_trash WHERE room_id = $1",
+    [roomId],
+  );
+
+  return result.rowCount ?? 0;
+}
+
+export async function consumeRateLimit(
+  bucket: string,
+  windowSeconds: number,
+  limit: number,
+) {
+  await ensureCanvasSchema();
+  const result = await pool().query<{ hits: number }>(
+    `
+      INSERT INTO canvas_rate_limits (bucket, window_start, hits)
+      VALUES (
+        $1,
+        to_timestamp(
+          floor(EXTRACT(EPOCH FROM NOW()) / $2::int) * $2::int
+        ),
+        1
+      )
+      ON CONFLICT (bucket, window_start)
+        DO UPDATE SET hits = canvas_rate_limits.hits + 1
+      RETURNING hits
+    `,
+    [bucket, windowSeconds],
+  );
+  const hits = result.rows[0].hits;
+
+  if (hits === 1 && bucket.endsWith("00")) {
+    void pool()
+      .query(
+        "DELETE FROM canvas_rate_limits WHERE window_start < NOW() - INTERVAL '2 days'",
+      )
+      .catch(() => {});
+  }
+
+  return { allowed: hits <= limit, hits };
 }
 
 export async function connectCanvasEvents() {

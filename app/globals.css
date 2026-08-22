@@ -1,8 +1,10 @@
-@import url("https://unpkg.com/@sakun/system.css");
-
 :root {
   --canvas-columns: 320;
   --canvas-rows: 180;
+  --canvas-scale: min(
+    calc(100vw / var(--canvas-columns)),
+    calc(100vh / var(--canvas-rows))
+  );
 }
 
 * {
@@ -15,6 +17,7 @@ body {
   min-height: 100%;
   margin: 0;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
@@ -38,21 +41,33 @@ a {
   position: fixed;
   inset: 0;
   overflow: hidden;
-  background-color: #ffffff;
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.035) 1px, transparent 1px);
-  background-size:
-    calc(100vw / var(--canvas-columns)) calc(100vh / var(--canvas-rows)),
-    calc(100vw / var(--canvas-columns)) calc(100vh / var(--canvas-rows));
+  background-color: var(--mac-paper);
+  background-image: var(--mac-dither-50);
+  background-size: var(--mac-dither-cell);
+}
+
+/* The painting keeps its 320:180 aspect so it is the same image on every screen. */
+.painting-frame {
+  --canvas-scale: min(
+    calc(100vw / var(--canvas-columns)),
+    calc(100vh / var(--canvas-rows))
+  );
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--canvas-scale) * var(--canvas-columns));
+  height: calc(var(--canvas-scale) * var(--canvas-rows));
+  background: var(--mac-paper);
+  transform: translate(-50%, -50%);
 }
 
 .painting-canvas {
   position: absolute;
   inset: 0;
   z-index: 1;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   image-rendering: pixelated;
   touch-action: none;
 }
@@ -68,8 +83,8 @@ a {
   top: 0;
   left: 0;
   z-index: 5;
-  width: max(4px, calc(var(--brush-size) * 100vw / var(--canvas-columns)));
-  height: max(4px, calc(var(--brush-size) * 100vh / var(--canvas-rows)));
+  width: max(4px, calc(var(--brush-size) * var(--canvas-scale)));
+  height: max(4px, calc(var(--brush-size) * var(--canvas-scale)));
   pointer-events: none;
   background: color-mix(in srgb, var(--brush-color) 28%, transparent);
   border: 1px solid color-mix(in srgb, var(--brush-color) 75%, #000000);
@@ -139,7 +154,13 @@ a {
   border-style: dashed;
 }
 
-.window {
+.painting-room {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.painting-room .window {
   position: absolute;
   z-index: 7;
   width: min(88vw, 320px);
@@ -148,14 +169,14 @@ a {
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.75);
 }
 
-.window .title-bar {
+.painting-room .window .title-bar {
   position: relative;
   min-height: 20px;
   cursor: move;
   touch-action: none;
 }
 
-.window-collapse {
+.painting-room .window-collapse {
   position: absolute;
   top: 2px;
   right: 3px;
@@ -168,31 +189,29 @@ a {
   background: #ffffff;
 }
 
-.collapsed-window {
+.painting-room .collapsed-window {
   width: min(70vw, 220px) !important;
 }
 
-.window-pane {
+.painting-room .window-pane {
   padding: 0.75rem;
 }
 
-.profile-window {
+.painting-room .profile-window {
   top: 50%;
   left: 50%;
   width: 286px;
   transform: translate(-50%, -50%);
 }
 
-.profile-window .window-pane {
+.painting-room .profile-window .window-pane {
   padding: 0.65rem 0.75rem 0.7rem;
 }
 
 .ascii-mark {
-  margin: 0 0 0.55rem;
-  color: var(--text, #111111);
-  font: 700 0.78rem/1 monospace;
-  text-align: center;
-  white-space: pre;
+  display: block;
+  margin: 0 auto 0.55rem;
+  image-rendering: pixelated;
 }
 
 .info-section p {
@@ -201,7 +220,8 @@ a {
   text-align: center;
 }
 
-a {
+.painting-room a,
+.painting-stage a {
   color: var(--anchor-text, #0000ee);
 }
 
@@ -226,62 +246,68 @@ nav[aria-label="Links"] {
   image-rendering: pixelated;
 }
 
-.palette-window {
+.painting-room .palette-window {
   top: 2.5%;
   left: 2%;
   z-index: 10;
   width: 262px;
 }
 
-.palette-window .window-pane {
+.painting-room .palette-window .window-pane {
   padding: 0.4rem;
 }
 
+/* MacPaint's tool palette: square 1-bit cells, hard hairline borders, selection by
+   inversion. Colour appears only in the swatches, because there it is the data. */
+
 .presence-row {
   display: flex;
-  gap: 0.35rem;
+  gap: 6px;
   align-items: center;
-  margin-bottom: 0.25rem;
-  font: 10px/1.1 Geneva, Chicago, sans-serif;
+  margin-bottom: 4px;
+  color: #000000;
+  font-family: var(--mac-font-geneva, Geneva_9, Geneva, sans-serif);
+  font-size: 16px;
+  line-height: 1;
 }
 
 .presence-dot {
-  width: 7px;
-  height: 7px;
-  background: #00a36c;
-  border: 1px solid #006341;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px #ffffff;
+  width: 6px;
+  height: 6px;
+  background: #000000;
 }
 
 .sync-status {
   margin-left: auto;
-  color: #666666;
 }
 
 .canvas-stats {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.35rem;
-  color: #666666;
-  font: 9px/1.1 Geneva, Chicago, sans-serif;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  color: #000000;
+  font-family: var(--mac-font-geneva, Geneva_9, Geneva, sans-serif);
+  font-size: 16px;
+  line-height: 1;
+  border-bottom: 1px solid #000000;
 }
 
 .tool-row {
   display: grid;
-  grid-template-columns: 34px 1fr;
-  gap: 0.25rem;
+  grid-template-columns: auto 1fr;
+  gap: 6px;
   align-items: center;
-  margin-bottom: 0.35rem;
+  margin-bottom: 6px;
 }
 
 .tool-label {
   display: block;
-  margin: 0 0 0.18rem;
-  color: #555555;
-  font: 700 9px/1 Geneva, Chicago, sans-serif;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  margin: 0 0 2px;
+  color: #000000;
+  font-family: var(--mac-font-chicago, Chicago_12, Chicago, sans-serif);
+  font-size: 16px;
+  line-height: 1;
 }
 
 .tool-row .tool-label {
@@ -291,27 +317,41 @@ nav[aria-label="Links"] {
 .brush-options {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.2rem;
+  gap: 0;
+  border: 1px solid #000000;
 }
 
 .brush-options button {
   min-width: 0;
-  height: 25px;
-  padding: 1px;
-  font: 15px/1 serif;
+  height: 22px;
+  padding: 0;
+  color: #000000;
+  font: 14px/1 serif;
+  background: #ffffff;
+  border: 0;
+  border-right: 1px solid #000000;
+  border-radius: 0;
+  cursor: default;
+  appearance: none;
+}
+
+.brush-options button:last-child {
+  border-right: 0;
 }
 
 .selected-tool {
-  color: #ffffff !important;
-  background: #111111 !important;
-  box-shadow: inset 0 0 0 1px #ffffff;
+  --mac-art-ink: var(--mac-paper);
+  --mac-art-paper: var(--mac-ink);
+  color: var(--mac-paper) !important;
+  background: var(--mac-ink) !important;
 }
 
 .color-swatches {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 0.2rem;
+  gap: 0;
   justify-content: center;
+  border: 1px solid #000000;
 }
 
 .color-swatch {
@@ -319,98 +359,136 @@ nav[aria-label="Links"] {
   min-width: 0;
   height: 20px;
   padding: 0;
-  cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.35);
-  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.12);
+  cursor: default;
+  border: 0;
+  border-right: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  border-radius: 0;
+  appearance: none;
+}
+
+.color-swatch:nth-child(8n),
+.color-swatch:last-child {
+  border-right: 0;
 }
 
 .color-swatch.selected-swatch {
-  outline: 2px solid #000000;
-  outline-offset: 0;
-  transform: scale(0.82);
+  box-shadow:
+    inset 0 0 0 2px #000000,
+    inset 0 0 0 3px #ffffff;
 }
 
 .eraser-swatch {
-  color: #111111;
-  font: 700 15px/1 monospace;
+  display: grid;
+  grid-column: 1 / -1;
+  height: 20px;
   background:
-    linear-gradient(45deg, #dddddd 25%, transparent 25%) 0 0 / 10px 10px,
-    linear-gradient(45deg, transparent 75%, #dddddd 75%) 0 0 / 10px 10px,
-    linear-gradient(45deg, transparent 75%, #dddddd 75%) 5px -5px / 10px 10px,
-    linear-gradient(45deg, #dddddd 25%, #ffffff 25%) 5px -5px / 10px 10px;
+    repeating-conic-gradient(#000000 0% 25%, #ffffff 0% 50%) 0 0 / 4px 4px;
+  border-bottom: 0;
+  place-items: center;
+}
+
+.eraser-chip {
+  padding: 1px 8px;
+  color: #000000;
+  font-family: var(--mac-font-chicago, Chicago_12, Chicago, sans-serif);
+  font-size: 16px;
+  line-height: 1;
+  background: #ffffff;
+  border: 1px solid #000000;
+}
+
+.eraser-swatch.selected-swatch .eraser-chip {
+  color: #ffffff;
+  background: #000000;
 }
 
 .fun-options {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.2rem;
-  margin-top: 0.35rem;
+  gap: 0;
+  margin-top: 6px;
+  border: 1px solid #000000;
 }
 
 .fun-options button {
   min-width: 0;
-  padding: 2px 1px;
+  padding: 3px 1px;
   overflow: hidden;
-  font-size: 9px;
+  color: #000000;
+  font-family: var(--mac-font-geneva, Geneva_9, Geneva, sans-serif);
+  font-size: 16px;
+  line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: #ffffff;
+  border: 0;
+  border-right: 1px solid #000000;
+  border-radius: 0;
+  cursor: default;
+  appearance: none;
 }
 
-.rainbow-tool:not(.selected-tool) {
-  background: linear-gradient(
-    90deg,
-    #ffb3b3,
-    #ffe0a3,
-    #ffffad,
-    #b7f5ce,
-    #b9efff,
-    #d9c2ff,
-    #ffc2e3
-  );
+.fun-options button:last-child {
+  border-right: 0;
 }
 
 .palette-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0.3rem;
-  margin-top: 0.35rem;
+  gap: 6px;
+  margin-top: 8px;
 }
 
 .palette-actions button {
   min-width: 0;
-  padding: 3px 2px;
-  font-size: 11px;
+  padding: 2px;
+  color: #000000;
+  font-family: var(--mac-font-chicago, Chicago_12, Chicago, sans-serif);
+  font-size: 16px;
+  line-height: 1.1;
+  background: #ffffff;
+  border: 1px solid #000000;
+  border-radius: 0;
+  cursor: default;
+  appearance: none;
+}
+
+.palette-actions button:active:not(:disabled) {
+  color: #ffffff;
+  background: #000000;
 }
 
 .palette-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
+  color: #b6b7b8;
+  border-color: #b6b7b8;
 }
 
 .agent-link,
 .setup-notice {
-  margin: 0.35rem 0 0;
-  font: 9px/1.2 Geneva, Chicago, sans-serif;
+  margin: 8px 0 0;
+  color: #000000;
+  font-family: var(--mac-font-geneva, Geneva_9, Geneva, sans-serif);
+  font-size: 16px;
+  line-height: 1.15;
 }
 
 .setup-notice {
-  padding: 0.35rem;
-  color: #5c4100;
-  background: #fff4bf;
-  border: 1px solid #bc9200;
+  padding: 4px;
+  border: 1px solid #000000;
 }
 
 @media (max-width: 700px) {
-  .profile-window {
+  .painting-room .profile-window {
     top: 29%;
     width: min(76vw, 270px);
   }
 
-  .profile-window .window-pane {
+  .painting-room .profile-window .window-pane {
     padding: 0.55rem;
   }
 
-  .palette-window {
+  .painting-room .palette-window {
     top: auto;
     bottom: 0.7rem;
     left: 50%;
@@ -418,7 +496,7 @@ nav[aria-label="Links"] {
     transform: translateX(-50%);
   }
 
-  .palette-window .window-pane {
+  .painting-room .palette-window .window-pane {
     padding: 0.5rem;
   }
 
@@ -433,8 +511,8 @@ nav[aria-label="Links"] {
     height: 21px;
   }
 
-  .agent-link,
-  .setup-notice {
+  .painting-room .agent-link,
+  .painting-room .setup-notice {
     display: none;
   }
 

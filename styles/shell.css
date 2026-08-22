@@ -1,0 +1,196 @@
+@import "./tokens.css";
+
+/* The desktop shell. Chrome comes from components/mac; this file only places it on the screen.
+   Every value is a token or a whole pixel, and nothing here names a colour. */
+
+/* The shared painting IS the desktop pattern. A dither behind it was tried and rejected:
+   it buries the artwork, and the artwork is the point of the machine. */
+.shell-desktop {
+  color: var(--mac-ink);
+}
+
+.shell-desktop a {
+  color: var(--mac-ink);
+  text-decoration: underline;
+}
+
+.shell-desktop button:focus-visible,
+.shell-desktop a:focus-visible,
+.shell-desktop [tabindex]:focus-visible {
+  outline: var(--mac-border);
+  outline-offset: var(--mac-space-2);
+}
+
+/* Windows are placed in viewport coordinates, so the layer spans the whole screen
+   rather than sitting under the menu bar. */
+.shell-window-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.shell-menu-region {
+  display: contents;
+}
+
+.shell-menu-spacer {
+  flex: 1 1 auto;
+}
+
+/* The apple is a black glyph; on an inverted title it has to invert with it. */
+.shell-desktop [role="menu-item"][data-open="true"] .apple {
+  filter: invert(1);
+}
+
+.shell-clock {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 0 var(--mac-space-10);
+  font-family: var(--mac-font-chicago);
+  font-size: var(--mac-text-base);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.shell-desktop .mac-desktop-icons {
+  gap: var(--mac-space-10);
+}
+
+.shell-icon-slot {
+  display: block;
+}
+
+.shell-window-pane {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: var(--mac-space-8);
+}
+
+.shell-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--mac-space-4);
+}
+
+.shell-list-row {
+  display: flex;
+  gap: var(--mac-space-8);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--mac-space-2) var(--mac-space-4);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  line-height: var(--mac-leading-base);
+  white-space: nowrap;
+}
+
+.shell-list-row[data-selected="true"] {
+  color: var(--mac-ink-inverted);
+  background: var(--mac-paper-inverted);
+}
+
+.shell-list-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell-list-empty {
+  padding: var(--mac-space-12) var(--mac-space-4);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  text-align: center;
+}
+
+.shell-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--mac-space-8);
+  justify-content: flex-end;
+}
+
+.shell-about {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mac-space-8);
+}
+
+.shell-about-head {
+  display: flex;
+  gap: var(--mac-space-12);
+  align-items: center;
+}
+
+.shell-about-title {
+  margin: 0;
+  font-family: var(--mac-font-display);
+  font-size: var(--mac-text-display);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.shell-about-line {
+  margin: 0;
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  line-height: var(--mac-leading-base);
+}
+
+.shell-about-figures {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--mac-space-2) var(--mac-space-12);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+}
+
+.shell-about-bar {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: var(--mac-space-8);
+  align-items: center;
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+}
+
+.shell-note {
+  margin: 0;
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  line-height: var(--mac-leading-base);
+}
+
+/* A Macintosh on a telephone. The metrics stay real; only the furniture moves. */
+@media (max-width: 700px) {
+  .mac-desktop-icons {
+    right: var(--mac-space-4);
+    max-height: var(--mac-desktop-icons-height);
+  }
+
+  .shell-clock {
+    padding: 0 var(--mac-space-4);
+    font-family: var(--mac-font-geneva);
+  }
+
+  .mac-menu-title {
+    padding: 0 var(--mac-space-6);
+  }
+
+  .mac-menu {
+    min-width: 160px;
+  }
+
+  .shell-about-bar {
+    grid-template-columns: 72px 1fr auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-desktop *,
+  .painting-stage * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

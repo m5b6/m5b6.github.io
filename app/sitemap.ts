@@ -1,12 +1,6 @@
 import type { MetadataRoute } from "next";
+import { sitemapEntries } from "@/lib/apps/discovery";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
-    {
-      url: "https://matiasberrios.com",
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 1,
-    },
-  ];
+  return sitemapEntries(new Date());
 }
