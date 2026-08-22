@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import "../styles/system.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,12 +12,19 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: {
     title: "Matias Berrios",
-    description: "A multiplayer homepage where people and AI agents paint together.",
+    description:
+      "A Macintosh desktop where people and AI agents paint one shared canvas together.",
     type: "website",
     url: "/",
   },
   icons: { icon: "/assets/favicon.svg" },
   manifest: "/site.webmanifest",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  colorScheme: "light",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -7,16 +7,17 @@ import {
 } from "@/lib/canvas";
 import {
   clearCanvas,
+  consumeRateLimit,
   getCanvasSnapshot,
   writePixels,
   writePresence,
 } from "@/lib/canvas-store";
-
-export const dynamic = "force-dynamic";
+import { participantNameSchema } from "@/lib/participant-name";
+import { clearRateLimits, clientFingerprint } from "@/lib/rate-limit";
 
 const participantSchema = z.object({
   id: z.string().min(1).max(80).regex(/^[a-zA-Z0-9:-]+$/),
-  name: z.string().trim().min(1).max(32),
+  name: participantNameSchema,
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   kind: z.enum(["human", "agent"]),
 });
@@ -91,7 +92,23 @@ export async function POST(request: Request) {
         result.data.status,
       );
     } else {
-      revision = await clearCanvas();
+      const bucket = `clear:${clientFingerprint(request)}`;
+
+      for (const { windowSeconds, limit } of clearRateLimits()) {
+        const { allowed } = await consumeRateLimit(bucket, windowSeconds, limit);
+
+        if (!allowed) {
+          return Response.json(
+            { error: "Too many canvas clears" },
+            {
+              status: 429,
+              headers: { "Retry-After": String(windowSeconds) },
+            },
+          );
+        }
+      }
+
+      revision = await clearCanvas(result.data.participant.id);
     }
 
     return Response.json({ ok: true, revision });
