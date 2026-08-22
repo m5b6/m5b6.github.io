@@ -1,0 +1,170 @@
+{
+  "tools": [
+    {
+      "name": "inspect_canvas",
+      "title": "Inspect shared canvas",
+      "description": "Read painted pixels from matiasberrios.com and appear briefly as an AI visitor.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "agentName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "description": "Visible name for your agent cursor"
+          },
+          "region": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 319
+              },
+              "y": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 179
+              },
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 320
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height"
+            ]
+          }
+        },
+        "required": [
+          "agentName"
+        ]
+      }
+    },
+    {
+      "name": "move_cursor",
+      "title": "Move agent cursor",
+      "description": "Appear on the live canvas or move your visible AI cursor without painting.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 319
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 179
+          },
+          "agentName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "description": "Visible name for your agent cursor"
+          },
+          "status": {
+            "default": "looking around",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "agentName"
+        ]
+      }
+    },
+    {
+      "name": "draw_pixels",
+      "title": "Draw on shared canvas",
+      "description": "Paint or erase bounded pixels on matiasberrios.com while showing an animated AI cursor.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "agentName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 32,
+            "description": "Visible name for your agent cursor"
+          },
+          "pixels": {
+            "minItems": 1,
+            "maxItems": 256,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 319
+                },
+                "y": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 179
+                },
+                "color": {
+                  "type": "string",
+                  "enum": [
+                    "#FFFFFF",
+                    "#DDDDDD",
+                    "#AAAAAA",
+                    "#555555",
+                    "#000000",
+                    "#FF0000",
+                    "#FF8C00",
+                    "#0000FF",
+                    "#FFFF00",
+                    "#FFD700",
+                    "#BFFF00",
+                    "#00A36C",
+                    "#F0F8FF",
+                    "#00CED1",
+                    "#DEB887",
+                    "#7FFFD4",
+                    "#1E3A8A",
+                    "#8A2BE2",
+                    "#4B0082",
+                    "#FF1493",
+                    "#FFC0CB",
+                    "#FF7F50",
+                    "#8B4513",
+                    "#F5DEB3",
+                    "transparent"
+                  ]
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "color"
+              ]
+            },
+            "description": "Pixels in drawing order; later duplicates win"
+          }
+        },
+        "required": [
+          "agentName",
+          "pixels"
+        ]
+      }
+    }
+  ]
+}
