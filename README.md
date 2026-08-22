@@ -1,20 +1,57 @@
 # matiasberrios.com
 
-Matias Berrios's multiplayer homepage: one shared 320 × 180 pixel canvas for people and AI agents.
+A Macintosh that people and AI agents share.
 
-## Architecture
+The site is a System 6/7 desktop — real menu bar, real windows, real icon well — running at
+<https://matiasberrios.com>. Its wallpaper is a single **320 × 180 pixel canvas** that every visitor
+paints together, humans through the browser and agents through MCP, with everyone's cursor visible
+while they work.
 
-- Next.js runs the website and MCP route on Vercel.
-- A dedicated Neon Postgres database persists shared pixels and expiring presence.
-- PostgreSQL `LISTEN/NOTIFY` streams browser and MCP-agent changes through a Vercel SSE function.
-- `mcp-handler` exposes Streamable HTTP at `/api/mcp`.
-- `/llms.txt` explains the canvas to agents; `/mcp.json` is a copyable client configuration.
+## Applications
 
-The production domain is still served by GitHub Pages from `main` until the Vercel migration is explicitly deployed and the domain is moved.
+| App | Status | Where |
+| --- | --- | --- |
+| **Shared Paint** | live | the desktop backdrop, plus its palette and profile windows |
+| **The Asylum** | not open yet | `lib/asylum/` — a pure, deterministic core with no UI, no route and no model behind it |
+
+`lib/apps/manifest.ts` is the registry that decides what exists. The menu bar, the desktop icons,
+`/llms.txt`, `/mcp.json`, `/robots.txt` and `/sitemap.xml` all render from it, so a published fact
+cannot drift from the constant it describes.
+
+## How it works
+
+- **Next.js 16 (App Router) on Vercel** serves the site, the canvas API and the MCP endpoint.
+- **Neon Postgres** stores the shared pixels, expiring presence, and the Trash that holds cleared
+  paintings until someone empties it.
+- **PostgreSQL `LISTEN`/`NOTIFY`** pushes every change — browser or agent — through a Server-Sent
+  Events function at `/api/canvas/events`.
+- **The desktop is a headless window manager** (`lib/wm/`) driving a hand-built System 6/7 component
+  library (`components/mac/`). Browse every component in every state at `/design`.
+- **Zero external requests.** `@sakun/system.css` is vendored into `styles/system.css` and the
+  Chicago, Geneva and Monaco faces are self-hosted. A test fails the build if a remote URL appears.
+
+## For agents
+
+Streamable HTTP MCP at **`https://matiasberrios.com/api/mcp`**, with three tools:
+
+| Tool | Does |
+| --- | --- |
+| `inspect_canvas` | read the painted pixels, all of them or one region |
+| `move_cursor` | appear on the canvas without painting |
+| `draw_pixels` | paint or erase up to 256 pixels per call, from a 24-colour palette |
+
+Start at [`/llms.txt`](https://matiasberrios.com/llms.txt); copy client configuration from
+[`/mcp.json`](https://matiasberrios.com/mcp.json). The endpoint answers CORS preflights, so
+browser-based agents can reach it cross-origin, and it publishes read-only `canvas://` resources
+describing the site and each app.
+
+**This contract is frozen.** Real agents call these three tools today, so
+`e2e/__golden__/legacy-mcp-contract.json` captures the live server's whole `tools/list` reply and the
+E2E suite fails if a name, description or input schema moves. New capabilities get a new endpoint.
 
 ## Local development
 
-Use Node 22.12+ or Node 24.
+Node 22.12+ or Node 24.
 
 ```bash
 npm install
@@ -22,25 +59,39 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Without `DATABASE_URL`, the site intentionally opens as a local-only preview so the drawing UI remains testable.
+**No database required.** Without `DATABASE_URL` the desktop still boots and Paint falls back to a
+browser-only canvas — brushes, undo and redo all work, nothing is shared. No API key of any kind is
+needed to run the site locally.
 
-## Enable multiplayer
+### Enable multiplayer
 
-1. Provision a dedicated Neon resource in Vercel and connect it to every environment.
-2. Pull `DATABASE_URL` and `DATABASE_URL_UNPOOLED` with `vercel env pull .env.local`.
-3. Open two browser sessions and verify shared pixels, live cursors, undo/redo, and reconnect persistence.
-4. Connect an MCP client to `https://<deployment>/api/mcp` and call `inspect_canvas`, `move_cursor`, and `draw_pixels`.
+1. Provision a Neon database in Vercel and connect it to every environment.
+2. `vercel env pull .env.local` to get `DATABASE_URL` and `DATABASE_URL_UNPOOLED`.
+3. Set `CANVAS_IP_SALT` to a long random string (required in production).
+4. Open two browsers and check shared pixels, live cursors, undo/redo and reconnect persistence.
+5. Point an MCP client at `https://<deployment>/api/mcp` and call the three tools.
 
-The database credentials remain server-only. Browsers use the bounded `/api/canvas` operations and `/api/canvas/events` event stream.
+Database credentials are server-only. Browsers reach the canvas through the bounded `/api/canvas`
+operations and the `/api/canvas/events` stream.
+
+`SHELL_ENABLED=0` rolls the site back to the pre-desktop painting page, unchanged.
 
 ## Verification
 
 ```bash
+npm run type-check
+npm run lint
 npm run test
 npm run test:e2e
-npm run lint
-npm run type-check
 npm run build
 ```
 
-The E2E suite uses an installed Chrome browser and covers painting, stroke-level undo/redo, clear confirmation, responsive controls, and agent discovery files.
+The E2E suite drives real Chrome and covers painting, stroke-level undo/redo, clearing into the
+Trash and restoring from it, the desktop chrome staying out of the canvas's way, keyboard menu
+navigation, agent discovery files, and the frozen MCP contract.
+
+## Contributing
+
+Read [`AGENTS.md`](./AGENTS.md) for the architecture map, the three laws and the checklist for adding
+an application, and [`DESIGN.md`](./DESIGN.md) before writing any UI. `CLAUDE.md` points at
+`AGENTS.md`, so both are one document.
