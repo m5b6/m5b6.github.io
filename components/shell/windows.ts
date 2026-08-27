@@ -1,10 +1,11 @@
-import { PAINT_APP } from "@/lib/apps/manifest";
+import { ASYLUM_APP, PAINT_APP, type AppId } from "@/lib/apps/manifest";
 import { MENU_BAR_HEIGHT } from "@/lib/wm/geometry";
 import type { OpenWindowInput, Viewport } from "@/lib/wm/types";
 
 export const SHELL_WINDOW_IDS = {
   paintTools: "paint.tools",
   paintProfile: "paint.profile",
+  ward: "asylum.ward",
   trash: "trash",
   about: "about",
 } as const;
@@ -55,6 +56,16 @@ export const SHELL_WINDOWS: readonly ShellWindowSpec[] = [
     narrow: { x: NARROW_GUTTER, y: TOP + 330 },
   },
   {
+    id: SHELL_WINDOW_IDS.ward,
+    appId: ASYLUM_APP.id,
+    title: ASYLUM_APP.title,
+    size: ASYLUM_APP.window.size,
+    /** Narrower than the registry's minimum so a phone keeps its icon column. */
+    minSize: { width: 300, height: 240 },
+    wide: { x: 318, y: TOP },
+    narrow: { x: NARROW_GUTTER, y: TOP },
+  },
+  {
     id: SHELL_WINDOW_IDS.trash,
     appId: "finder",
     title: "Trash",
@@ -73,6 +84,12 @@ export const SHELL_WINDOWS: readonly ShellWindowSpec[] = [
     narrow: { x: NARROW_GUTTER, y: TOP + 20 },
   },
 ];
+
+/** The window an application's icon and Apple-menu entry open. Apps may own more. */
+export const APP_MAIN_WINDOW: Readonly<Record<AppId, ShellWindowId>> = {
+  paint: SHELL_WINDOW_IDS.paintTools,
+  asylum: SHELL_WINDOW_IDS.ward,
+};
 
 export function shellWindow(id: ShellWindowId): ShellWindowSpec {
   const spec = SHELL_WINDOWS.find((candidate) => candidate.id === id);

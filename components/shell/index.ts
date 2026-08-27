@@ -15,14 +15,17 @@ export {
 } from "./shell-menu-bar";
 export { ShellClock, formatClock } from "./shell-clock";
 export {
+  asylumMenuActions,
   paintMenuActions,
   registryMenus,
   unhandledMenuItemIds,
   type MenuAction,
   type MenuActions,
   type PaintMenuContext,
+  type WardMenuContext,
 } from "./app-menus";
 export {
+  APP_MAIN_WINDOW,
   SHELL_WINDOWS,
   SHELL_WINDOW_IDS,
   STARTUP_WINDOW_IDS,

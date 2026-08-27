@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { AsylumWardWindow } from "@/components/asylum";
 import { MacAlert, MacButton } from "@/components/mac";
 import {
   ClearCanvasAlert,
@@ -11,11 +12,12 @@ import {
   usePaintTools,
 } from "@/components/painting-surface";
 import type { PaintSession } from "@/components/painting-experience";
-import { APPS, PAINT_APP, type AppSpec } from "@/lib/apps/manifest";
+import { APPS, type AppSpec } from "@/lib/apps/manifest";
 import { useModalFocus } from "@/components/use-modal-focus";
 import { describeTrash, totalTrashedPixels } from "@/lib/trash";
+import { useWindow } from "@/lib/wm/store";
 import { AboutPanel } from "./about-panel";
-import { paintMenuActions, registryMenus } from "./app-menus";
+import { asylumMenuActions, paintMenuActions, registryMenus } from "./app-menus";
 import { useShellStore } from "./desktop-store";
 import { Desktop } from "./desktop";
 import type { ShellIconModel } from "./desktop-icons";
@@ -24,6 +26,7 @@ import { APPLE_MENU_ID, type ShellMenuModel } from "./shell-menu-bar";
 import { TrashPanel } from "./trash-panel";
 import { useTrash } from "./use-trash";
 import {
+  APP_MAIN_WINDOW,
   SHELL_WINDOWS,
   SHELL_WINDOW_IDS,
   isNarrow,
@@ -50,6 +53,7 @@ export function PaintDesktop({ session }: { session: PaintSession }) {
   const [askingToClear, setAskingToClear] = useState(false);
   const [askingToEmpty, setAskingToEmpty] = useState(false);
   const [locked, setLocked] = useState<AppSpec | null>(null);
+  const ward = useWindow(store, SHELL_WINDOW_IDS.ward);
 
   const { entries: discarded, busy: trashBusy, putBack, empty } = trash;
   const pixelCount = Object.keys(session.pixels).length;
@@ -88,13 +92,18 @@ export function PaintDesktop({ session }: { session: PaintSession }) {
     }
   }, [store]);
 
+  const closeWindow = useCallback(
+    (id: ShellWindowId) => store.dispatch({ type: "close", id }),
+    [store],
+  );
+
   const openApp = useCallback(
     (app: AppSpec) => {
       if (app.status !== "live") {
         setLocked(app);
         return;
       }
-      openWindow(SHELL_WINDOW_IDS.paintTools);
+      openWindow(APP_MAIN_WINDOW[app.id]);
     },
     [openWindow],
   );
@@ -167,8 +176,8 @@ export function PaintDesktop({ session }: { session: PaintSession }) {
     return [
       { id: APPLE_MENU_ID, title: "Apple", label: "Apple", entries: appleEntries },
       { id: "file", title: "File", entries: fileEntries },
-      ...registryMenus(
-        paintMenuActions({
+      ...registryMenus({
+        ...paintMenuActions({
           canUndo: session.canUndo,
           canRedo: session.canRedo,
           pixelCount,
@@ -183,14 +192,21 @@ export function PaintDesktop({ session }: { session: PaintSession }) {
           toggleMirror: tools.toggleMirror,
           requestClear: () => setAskingToClear(true),
         }),
-      ),
+        ...asylumMenuActions({
+          watching: ward !== null,
+          watch: () => openWindow(SHELL_WINDOW_IDS.ward),
+          stopWatching: () => closeWindow(SHELL_WINDOW_IDS.ward),
+        }),
+      }),
       { id: "special", title: "Special", entries: specialEntries },
     ];
   }, [
     cleanUp,
+    closeWindow,
     discarded.length,
     openApp,
     openWindow,
+    ward,
     pixelCount,
     putBack,
     session.canRedo,
@@ -277,8 +293,8 @@ export function PaintDesktop({ session }: { session: PaintSession }) {
                 </MacButton>
               }
             >
-              {locked?.title} has not opened yet. {PAINT_APP.title} is the only
-              application on this Macintosh today.
+              {locked?.title} has not opened yet. Its icon stays on the desktop
+              until it does.
             </MacAlert>
           </>
         }
@@ -308,6 +324,8 @@ export function PaintDesktop({ session }: { session: PaintSession }) {
         >
           <TrashPanel trash={trash} onRequestEmpty={() => setAskingToEmpty(true)} />
         </ManagedWindow>
+
+        <AsylumWardWindow />
 
         <ManagedWindow id={SHELL_WINDOW_IDS.about}>
           <AboutPanel

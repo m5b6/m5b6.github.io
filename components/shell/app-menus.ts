@@ -47,6 +47,26 @@ export function paintMenuActions(context: PaintMenuContext): MenuActions {
   };
 }
 
+export type WardMenuContext = {
+  watching: boolean;
+  watch: () => void;
+  stopWatching: () => void;
+};
+
+/**
+ * Watching is the ward's only clock: closing the window is not a cosmetic act,
+ * it is what stops Ward 7. The menu says so by offering exactly those two verbs.
+ */
+export function asylumMenuActions(context: WardMenuContext): MenuActions {
+  return {
+    "asylum.watch": { onSelect: context.watch, checked: context.watching },
+    "asylum.stop": {
+      onSelect: context.stopWatching,
+      disabled: !context.watching,
+    },
+  };
+}
+
 function toEntries(spec: MenuSpec, actions: MenuActions): ShellMenuEntry[] {
   return spec.items.map((item) => {
     const action = actions[item.id];
