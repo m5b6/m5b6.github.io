@@ -42,7 +42,11 @@ export default defineConfig([
   globalIgnores([".next/**", "next-env.d.ts"]),
   {
     name: "macintosh/no-drift",
-    files: ["app/**/*.{ts,tsx}", "components/apps/**/*.{ts,tsx}"],
+    files: [
+      "app/**/*.{ts,tsx}",
+      "components/apps/**/*.{ts,tsx}",
+      "components/asylum/**/*.{ts,tsx}",
+    ],
     rules: {
       "no-restricted-syntax": [
         "error",

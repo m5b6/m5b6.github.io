@@ -12,7 +12,7 @@ while they work.
 | App | Status | Where |
 | --- | --- | --- |
 | **Shared Paint** | live | the desktop backdrop, plus its palette and profile windows |
-| **The Asylum** | not open yet | `lib/asylum/` — a pure, deterministic core with no UI, no route and no model behind it |
+| **The Asylum** | live, dreaming | `/asylum` — Ward 7, six inmates, `lib/asylum/` plus `components/asylum/` and `/api/asylum/mcp` |
 
 `lib/apps/manifest.ts` is the registry that decides what exists. The menu bar, the desktop icons,
 `/llms.txt`, `/mcp.json`, `/robots.txt` and `/sitemap.xml` all render from it, so a published fact

@@ -29,9 +29,15 @@ everyone paints together, with live cursors, undo/redo, a Trash that holds clear
 MCP endpoint that real agents already call. The canvas is not a window — it *is* the desktop
 backdrop, full-viewport, with the menu bar, icons and windows floating over it.
 
-A second application, **The Asylum**, exists only as a pure deterministic core in `lib/asylum/`. It
-is not wired to any UI, route, database table or model. The registry marks it `status: "upcoming"`
-and every published surface says so. Do not describe it as shipped.
+A second application, **The Asylum**, is live at `/asylum`: six inmates named after Macintosh
+system objects, held in Ward 7, with human-like tools they can use on each other and on the tool set
+itself. A pure deterministic core in `lib/asylum/`, a persistence layer (`store.ts`, `engine.ts`,
+migration 4), its own API under `app/api/asylum/`, its own MCP endpoint at `/api/asylum/mcp`, and a
+window in `components/asylum/`.
+
+No model answers today: `OPENROUTER_API_KEY` is absent, so the ward dreams its dialogue from a seed.
+That is a state of the world, not a failure, and the UI says so in those terms. Never render a
+missing key, a rate limit or a cold start as an error — the fiction absorbs them.
 
 Read `DESIGN.md` before you write any UI. It is the law and it is enforced by lint and tests.
 
@@ -73,7 +79,10 @@ endpoint, and — automatically, because they render from the registry — in `/
 | `lib/apps/` | **The registry.** `manifest.ts` is the single source of truth for apps, windows, menus and agent surfaces; `facts.ts` resolves `{tokens}`; `discovery.ts` renders every published file from it. | Hard-coding a fact that already lives in a constant. Drift tests will catch you. |
 | `lib/wm/` | The headless window manager: `types`, `geometry`, `reducer`, `persistence`, `store`. Pure, testable, `localStorage`-backed with a strict zod validator. | JSX. A second reducer. Reading the DOM. |
 | `lib/mcp/` | `canvas-server.ts` (the frozen tools), `canvas-resources.ts`, `with-cors.ts`, `with-rate-limit.ts`. | Loosening `legacyParticipantNameSchema`. |
-| `lib/asylum/` | The asylum pure core — cast, world, tools, face, filter, dream, corpus, torments, narrate, rng. Fully deterministic: **no `Date.now`, no `Math.random`.** | Side effects, network calls, database access, model calls. Keep the core pure; wire it at the edge when it ships. |
+| `lib/asylum/` | The asylum pure core — cast, world, tools, face, filter, dream, corpus, torments, narrate, rng. Fully deterministic: **no `Date.now`, no `Math.random`.** | Side effects, network calls, database access, model calls. Keep the core pure; the edge lives in `store.ts` and `engine.ts`. |
+| `lib/asylum/store.ts` | The only asylum module that talks to Postgres: ward state, the append-only event log, spectators, the spend ledger, `pg_notify`, and the advisory lock the tick runner holds. | Being imported from a client component. A second rate limiter — it reuses `consumeRateLimit`. |
+| `lib/asylum/engine.ts` | The tick engine and the ward's action boundary: spectator gating, bounded catch-up, failure absorption, the `WardIntent` seam a live model provider drops into, and the zod schemas every asylum request is parsed with. | Free-text input of any kind (D1). An OpenRouter client — the seam is `resolveWardIntent`. |
+| `app/api/asylum/` | The ward's bounded API: `state/` (snapshot and `?since=` delta), `presence/` (heartbeat, may catch up), `events/` (SSE), `tick/` (the cron runner, behind `CRON_SECRET`). | A fifth verb. Catch-up on the delta endpoint. |
 | `lib/canvas.ts` | Isomorphic canvas constants and pure helpers. Imported by client, server, tests and e2e. | `server-only`, `pg`, secrets. |
 | `lib/canvas-store.ts` | The only module that talks to Postgres. Pool, LISTEN/NOTIFY, pixels, presence, trash, rate-limit counters. | Being imported from a client component. |
 | `lib/migrations.ts` | The versioned migration runner and the ordered `MIGRATIONS` list. | A bare `CREATE TABLE` anywhere else. |
@@ -172,6 +181,9 @@ is wrong, fix the test on purpose and say so.
 | `SHELL_ENABLED` | server | `0` rolls the site back to the pre-desktop painting page. Anything else (including unset) means the desktop. |
 | `NEXT_PUBLIC_SITE_URL` | **public** | Only `metadataBase`. The one variable that may reach the browser. |
 | `VERCEL_ENV` | server, set by Vercel | Selects production rate limits and the production room id. |
+| `CRON_SECRET` | **server-only** | `Authorization: Bearer` on `/api/asylum/tick`. Without it the tick route answers `401` and only visitors move the ward. |
+| `OPENROUTER_API_KEY` | **server-only** | Absent today. Live models stay off unless `VERCEL_ENV=production` **and** this is set (D9); even then the provider is unwritten and the ward dreams. |
+| `ASYLUM_ROOM_ID` | **server-only** | Optional ward override. Non-production deploys get a suffixed ward automatically, exactly like the canvas room. |
 
 Nothing else may be `NEXT_PUBLIC_*`. Any module that reads a secret or touches the database imports
 `"server-only"` at the top — `lib/canvas-store.ts`, `lib/migrations.ts`, `lib/rate-limit.ts`,
@@ -191,8 +203,12 @@ canvas with working brushes, undo and redo. The desktop, menu bar, windows and T
 The canvas API answers `503` instead of crashing.
 
 **With no OpenRouter key** everything works, because nothing calls a model. `lib/asylum/` is pure by
-construction. When the asylum is wired, it must keep this property: no key means the ward is closed,
-not that the site breaks. Never make a first-run local dev depend on a secret.
+construction and `resolveWardIntent()` returns the dream. No key means the ward dreams, not that the
+site breaks. Never make a first-run local dev depend on a secret.
+
+**With no `DATABASE_URL`** the ward still opens: `isAsylumConfigured()` is false, so
+`/api/asylum/state` answers a locally dreamed preview marked `persisted: false` instead of an error,
+and nothing is written down.
 
 ---
 
@@ -253,6 +269,24 @@ control actually is. **Verify with a real click test, never by reasoning about z
 tiers only when `VERCEL_ENV === "production"`; everywhere else it relaxes so the canvas stays
 testable. `MCP_RATE_LIMITS` (60/min, 600/hour) applies to POSTs on `/api/mcp`. Do not "fix" the
 relaxed preview limits — the e2e suite depends on them.
+
+**The ward only decays while somebody is watching, and that is a bill as much as a thesis.** The
+tick engine is gated on live spectators (`asylum_spectators`, TTL-scoped like `canvas_participants`).
+Zero spectators means zero ticks and **zero writes** — `lib/asylum/engine.test.ts` proves it with a
+session that records every save, and `store.integration.test.ts` proves it again by counting rows.
+That is why the cron in `vercel.json` is **hourly** and not per-minute: a per-minute cron writes to
+Postgres every minute, which pins Neon awake around the clock and spends the free compute allowance
+on an empty room. The cron is insurance, not the clock. The clock is the visitor: presence and MCP
+visits are the cold entry points that catch up, capped at `MAX_CATCHUP_TICKS`, and a gap longer than
+`DORMANT_AFTER_MS` is never replayed, because nobody was watching it happen.
+
+**One runner ticks the ward.** `withWardLock` opens a transaction and takes
+`pg_try_advisory_xact_lock`; the loser returns `null` and reports `busy` rather than replaying the
+beat. It must stay a *transaction* lock — a session lock is not safe over a pooled Neon connection.
+Only `presence`, `tick` and a visitor act may catch up. `GET /api/asylum/state?since=` never does:
+it is a read, and a read must not move the ward. The tick route answers **both** `GET` and `POST`
+behind the same guard, because Vercel Cron invokes a path with `GET` and the runner has to be
+callable by hand.
 
 **Migrations are append-only.** `lib/migrations.ts` runs pending versions inside a transaction held
 by a Postgres advisory lock and records them in `schema_migrations`. Append a new `{ version, sql }`

@@ -1,7 +1,7 @@
 import { ASYLUM_APP, PAINT_APP, SITE } from "@/lib/apps/manifest";
 import { ASYLUM_WARD_NAME, CAST } from "@/lib/asylum/cast";
 import { TORMENTS } from "@/lib/asylum/torments";
-import type { VisitorToolName } from "@/lib/asylum/tools";
+import type { AgentToolName } from "@/lib/mcp/asylum-tools";
 import {
   AGENT_CURSOR_SECONDS,
   CANVAS_HEIGHT,
@@ -36,7 +36,7 @@ export const CANVAS_TOOL_NAMES: readonly string[] = PAINT_APP.agent.tools.map(
   (tool) => tool.name,
 );
 
-export const ASYLUM_TOOL_NAMES: readonly VisitorToolName[] =
+export const ASYLUM_TOOL_NAMES: readonly AgentToolName[] =
   ASYLUM_APP.agent.tools.map((tool) => tool.name);
 
 export const FACT_TOKENS: Readonly<Record<string, string>> = {

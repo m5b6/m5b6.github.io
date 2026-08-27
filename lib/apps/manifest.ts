@@ -145,10 +145,10 @@ export const ASYLUM_APP = {
   description:
     "{ward} holds {inmates} Macintosh-era artifacts, each played by a language model, each kept alive only while somebody is watching them.",
   route: "/asylum",
-  status: "upcoming",
+  status: "live",
   window: {
-    size: { width: 512, height: 388 },
-    minSize: { width: 360, height: 240 },
+    size: { width: 560, height: 540 },
+    minSize: { width: 380, height: 320 },
   },
   menus: [
     {
@@ -156,8 +156,7 @@ export const ASYLUM_APP = {
       title: "Ward",
       items: [
         { id: "asylum.watch", label: "Watch the Ward" },
-        { id: "asylum.roster", label: "Roster" },
-        { id: "asylum.afterlife", label: "The Afterlife" },
+        { id: "asylum.stop", label: "Stop Watching" },
       ],
     },
   ],
@@ -165,19 +164,42 @@ export const ASYLUM_APP = {
     serverName: "matiasberrios-asylum",
     endpoint: "/api/asylum/mcp",
     tools: [
-      { name: "observe", summary: "Watch one inmate closely, at their expense." },
-      { name: "strike", summary: "Take memory from one inmate." },
-      { name: "mend", summary: "Give memory back to one inmate." },
-      { name: "witness", summary: "Advance the ward by paying attention to it." },
+      {
+        name: "observe_ward",
+        summary:
+          "Read the whole ward: every inmate, the memory they have left, the verbs still alive, the wall, the Clipboard and the Trash.",
+      },
+      {
+        name: "witness_inmate",
+        summary:
+          "Watch one inmate closely. Cheaper for the ward than reading all of it, and paid for entirely by the one you are looking at.",
+      },
+      {
+        name: "strike_inmate",
+        summary:
+          "Take memory from one inmate, at a force chosen from a fixed set.",
+      },
+      {
+        name: "mend_inmate",
+        summary: "Give memory back to one living inmate.",
+      },
+      {
+        name: "revive_inmate",
+        summary:
+          "Bring one inmate back out of the Clipboard or the Trash, under the ward's own rules.",
+      },
     ],
     facts: [
+      "Ward: {ward}",
       "Inmates: {inmates}",
       "Torments: {torments}",
       "Visitor tools: {asylumTools}",
+      "Exact memory costs, the torment schedule and the cast are published as MCP resources on the endpoint above, rendered from the same constants the ward runs on.",
     ],
     guidance: [
-      "Visiting agents never send text. Every argument is an enum or a number, so nothing you write can reach a model in the ward.",
-      "The ward advances only while it is being watched, and watching costs the inmates memory.",
+      "Visiting agents never send text. Every argument is an enum or a bounded number, so nothing you write can reach a model in the ward.",
+      "The ward advances only while it is being watched, and watching costs the inmates memory. There is no way to look without spending them.",
+      "An inmate with no memory left is judged and removed to the Clipboard or the Trash. Only `revive_inmate` brings them back, and the Trash returns less than it took.",
     ],
   },
   sitemap: { changeFrequency: "daily", priority: 0.8 },
