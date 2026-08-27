@@ -78,6 +78,56 @@ export const MIGRATIONS: readonly Migration[] = [
         ON canvas_trash (room_id, discarded_at DESC);
     `,
   },
+  {
+    version: 4,
+    sql: `
+      CREATE TABLE IF NOT EXISTS asylum_ward (
+        room_id text PRIMARY KEY,
+        revision bigint NOT NULL DEFAULT 0,
+        seed integer NOT NULL,
+        state jsonb NOT NULL,
+        ticked_at timestamptz NOT NULL DEFAULT NOW(),
+        updated_at timestamptz NOT NULL DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS asylum_events (
+        room_id text NOT NULL,
+        revision bigint NOT NULL,
+        seq smallint NOT NULL,
+        tick integer NOT NULL,
+        kind varchar(24) NOT NULL,
+        event jsonb NOT NULL,
+        line text,
+        created_at timestamptz NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (room_id, revision, seq)
+      );
+
+      CREATE TABLE IF NOT EXISTS asylum_spectators (
+        room_id text NOT NULL,
+        spectator_id text NOT NULL,
+        kind varchar(8) NOT NULL,
+        last_seen timestamptz NOT NULL DEFAULT NOW(),
+        expires_at timestamptz NOT NULL,
+        PRIMARY KEY (room_id, spectator_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS asylum_spectators_expiry
+        ON asylum_spectators (room_id, expires_at);
+
+      CREATE TABLE IF NOT EXISTS asylum_spend (
+        budget_key text NOT NULL,
+        window_start timestamptz NOT NULL,
+        calls integer NOT NULL DEFAULT 0,
+        tokens bigint NOT NULL DEFAULT 0,
+        micro_usd bigint NOT NULL DEFAULT 0,
+        updated_at timestamptz NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (budget_key, window_start)
+      );
+
+      CREATE INDEX IF NOT EXISTS asylum_spend_window
+        ON asylum_spend (window_start);
+    `,
+  },
 ];
 
 export function pendingMigrations(
@@ -145,4 +195,27 @@ export async function runMigrations(
   }
 
   throw new Error("Canvas migrations are held by another instance");
+}
+
+const migrationGlobal = globalThis as typeof globalThis & {
+  schemaMigration?: Promise<void>;
+};
+
+/**
+ * One migration run per process, shared by every store. Each store owns its own pool but
+ * they all contend for the same advisory lock, so letting two bootstraps race made the
+ * loser spin for ten seconds before giving up.
+ */
+export function ensureSchema(
+  pool: Pool,
+  migrations: readonly Migration[] = MIGRATIONS,
+) {
+  migrationGlobal.schemaMigration ??= runMigrations(pool, migrations).catch(
+    (error: unknown) => {
+      migrationGlobal.schemaMigration = undefined;
+      throw error;
+    },
+  );
+
+  return migrationGlobal.schemaMigration;
 }
