@@ -1,5 +1,6 @@
 "use client";
 
+import { WardBootProvider, type WardBoot } from "@/components/asylum";
 import { PaintingExperience } from "@/components/painting-experience";
 import type { ParticipantKind } from "@/lib/canvas";
 import { ShellStoreProvider } from "./desktop-store";
@@ -8,6 +9,8 @@ import { PaintDesktop } from "./paint-desktop";
 export type ShellProps = {
   initialKind: ParticipantKind;
   multiplayerEnabled: boolean;
+  /** Present only on the asylum's own route, which is what opens Ward 7. */
+  ward?: WardBoot | null;
 };
 
 /**
@@ -17,14 +20,16 @@ export type ShellProps = {
  * window drag from reaching the canvas: the drag re-renders the dragged window and
  * nothing else in the tree.
  */
-export function Shell({ initialKind, multiplayerEnabled }: ShellProps) {
+export function Shell({ initialKind, multiplayerEnabled, ward = null }: ShellProps) {
   return (
     <ShellStoreProvider>
-      <PaintingExperience
-        initialKind={initialKind}
-        multiplayerEnabled={multiplayerEnabled}
-        surface={PaintDesktop}
-      />
+      <WardBootProvider boot={ward}>
+        <PaintingExperience
+          initialKind={initialKind}
+          multiplayerEnabled={multiplayerEnabled}
+          surface={PaintDesktop}
+        />
+      </WardBootProvider>
     </ShellStoreProvider>
   );
 }

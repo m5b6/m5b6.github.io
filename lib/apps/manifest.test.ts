@@ -16,6 +16,11 @@ import {
 } from "@/lib/apps/manifest";
 import { VISITOR_TOOL_NAMES } from "@/lib/asylum/tools";
 import {
+  AGENT_TOOL_ACTS,
+  AGENT_TOOL_NAMES,
+  visitorToolsReachedByAgents,
+} from "@/lib/mcp/asylum-tools";
+import {
   AGENT_CURSOR_SECONDS,
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
@@ -26,6 +31,10 @@ import {
 const root = join(import.meta.dirname, "..", "..");
 const canvasServer = readFileSync(
   join(root, "lib", "mcp", "canvas-server.ts"),
+  "utf8",
+);
+const asylumServer = readFileSync(
+  join(root, "lib", "mcp", "asylum-server.ts"),
   "utf8",
 );
 
@@ -53,6 +62,10 @@ function pageFile(app: AppSpec) {
   return app.route === "/"
     ? join(root, "app", "page.tsx")
     : join(root, "app", app.route.slice(1), "page.tsx");
+}
+
+function endpointFile(app: AppSpec) {
+  return join(root, "app", ...app.agent.endpoint.slice(1).split("/"), "route.ts");
 }
 
 function copyStrings() {
@@ -106,6 +119,7 @@ describe("app registry", () => {
   it("gives every live app a real route file", () => {
     for (const app of liveApps()) {
       expect(existsSync(pageFile(app)), app.route).toBe(true);
+      expect(existsSync(endpointFile(app)), app.agent.endpoint).toBe(true);
     }
 
     expect(menuContributions().map((menu) => menu.id)).toEqual(
@@ -122,8 +136,28 @@ describe("app registry", () => {
     expect(registeredTools(canvasServer)).toHaveLength(3);
   });
 
-  it("documents the asylum visitor tools that actually exist", () => {
+  it("documents the asylum server that is actually running", () => {
+    expect(
+      existsSync(join(root, "app", "api", "asylum", "mcp", "route.ts")),
+    ).toBe(true);
+    /** Derived, never retyped: e2e/asylum-mcp.spec.ts pins the live value. */
+    expect(registeredServerName(asylumServer)).toBeUndefined();
+    expect(asylumServer).toContain("ASYLUM_APP.agent.serverName");
+    expect(sorted(registeredTools(asylumServer))).toEqual(
+      sorted(AGENT_TOOL_NAMES),
+    );
+    expect(registeredTools(asylumServer)).toHaveLength(AGENT_TOOL_NAMES.length);
     expect(sorted(ASYLUM_APP.agent.tools.map((tool) => tool.name))).toEqual(
+      sorted(AGENT_TOOL_NAMES),
+    );
+  });
+
+  it("reaches the ward only through verbs the pure core already models", () => {
+    for (const [tool, act] of Object.entries(AGENT_TOOL_ACTS)) {
+      expect(VISITOR_TOOL_NAMES, tool).toContain(act);
+    }
+
+    expect(sorted(visitorToolsReachedByAgents())).toEqual(
       sorted(VISITOR_TOOL_NAMES),
     );
   });

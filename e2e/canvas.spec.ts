@@ -306,8 +306,17 @@ test("publishes agent discovery files", async ({ request }) => {
       "matiasberrios-canvas": {
         url: "https://matiasberrios.com/api/mcp",
       },
+      "matiasberrios-asylum": {
+        url: "https://matiasberrios.com/api/asylum/mcp",
+      },
     },
   });
+
+  const sitemap = await request.get("/sitemap.xml");
+  expect(sitemap.ok()).toBeTruthy();
+  const sitemapText = await sitemap.text();
+  expect(sitemapText).toContain("https://matiasberrios.com/asylum");
+  expect(instructionText).toContain("https://matiasberrios.com/api/asylum/mcp");
 });
 
 test("lets an MCP agent paint the shared canvas", async ({ request }) => {

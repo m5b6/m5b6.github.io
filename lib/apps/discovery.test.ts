@@ -167,14 +167,34 @@ describe("generated discovery documents", () => {
         "matiasberrios-canvas": {
           url: "https://matiasberrios.com/api/mcp",
         },
+        "matiasberrios-asylum": {
+          url: "https://matiasberrios.com/api/asylum/mcp",
+        },
       },
     });
     expect(Object.keys(mcpClientConfig().mcpServers)).toHaveLength(
       liveApps().length,
     );
-    expect(instructions).not.toContain(
-      absoluteUrl(ASYLUM_APP.agent.endpoint),
-    );
+
+    for (const app of APPS) {
+      const published = instructions.includes(
+        absoluteUrl(app.agent.endpoint),
+      );
+      expect(published, `${app.id} endpoint`).toBe(app.status === "live");
+    }
+  });
+
+  it("describes both applications, page and endpoint alike", () => {
+    for (const app of [PAINT_APP, ASYLUM_APP]) {
+      expect(instructions, app.id).toContain(app.title);
+      expect(instructions, app.id).toContain(absoluteUrl(app.route));
+      expect(instructions, app.id).toContain(absoluteUrl(app.agent.endpoint));
+    }
+
+    expect(sitemap().map((entry) => entry.url)).toEqual([
+      absoluteUrl(PAINT_APP.route),
+      absoluteUrl(ASYLUM_APP.route),
+    ]);
   });
 
   it("points crawlers at the sitemap and the instructions", () => {

@@ -1,0 +1,531 @@
+@import "./tokens.css";
+
+/* Ward 7. Window content only: the frame, the menu bar and the desktop belong to
+   the shell. One bit throughout — the only textures here are the 50% dither and
+   inversion, because those are the two the Macintosh actually had. */
+
+.ward-pane {
+  display: flex;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ward {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  color: var(--mac-ink);
+  font-family: var(--mac-font-chicago);
+  font-size: var(--mac-text-base);
+  line-height: var(--mac-leading-base);
+  background: var(--mac-paper);
+  container: ward / inline-size;
+}
+
+.ward p,
+.ward h3,
+.ward ul,
+.ward ol {
+  margin: 0;
+  padding: 0;
+}
+
+.ward ul,
+.ward ol {
+  list-style: none;
+}
+
+/* 6. The observer line. The visitor is the cause, not the audience. */
+.ward-observer {
+  flex: 0 0 auto;
+  padding: var(--mac-space-4) var(--mac-space-8);
+  border-bottom: var(--mac-border);
+}
+
+.ward-observer-head {
+  font-family: var(--mac-font-chicago);
+  font-size: var(--mac-text-base);
+}
+
+.ward-observer-note {
+  margin-top: var(--mac-space-2);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+}
+
+.ward-observer-aside {
+  display: none;
+}
+
+.ward[data-connection="away"] .ward-observer,
+.ward[data-connection="quiet"] .ward-observer {
+  color: var(--mac-ink-inverted);
+  background: var(--mac-paper-inverted);
+}
+
+.ward-heading {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--mac-space-8);
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--mac-font-chicago);
+  font-size: var(--mac-text-title);
+  white-space: nowrap;
+}
+
+.ward-heading-note {
+  flex: 0 1 auto;
+  overflow: hidden;
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ward-main {
+  display: grid;
+  flex: 1 1 auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--mac-space-8);
+  min-height: 0;
+  padding: var(--mac-space-4) var(--mac-space-8);
+  overflow-y: auto;
+}
+
+.ward-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mac-space-4);
+  min-width: 0;
+  container: wardcol / inline-size;
+}
+
+/* 1. The ward. The bar is not health, it is how much memory is left to be itself with. */
+.mac-scroll-area.ward-roster-scroll,
+.mac-scroll-area.ward-wall {
+  overflow: visible;
+}
+
+.ward-inmate {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  gap: var(--mac-space-6);
+  padding: var(--mac-space-2) var(--mac-space-6);
+  border-bottom: var(--mac-border);
+}
+
+.ward-inmate:last-child {
+  border-bottom: 0;
+}
+
+.ward-inmate-body {
+  min-width: 0;
+}
+
+.ward-inmate-head {
+  display: flex;
+  gap: var(--mac-space-6);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.ward-inmate-name {
+  flex: 0 0 auto;
+  font-family: var(--mac-font-chicago);
+  font-size: var(--mac-text-base);
+  white-space: nowrap;
+}
+
+.ward-inmate-condition {
+  flex: 0 1 auto;
+  overflow: hidden;
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ward-inmate-model {
+  overflow: hidden;
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ward-inmate-memory {
+  display: flex;
+  gap: var(--mac-space-6);
+  align-items: center;
+  margin-top: var(--mac-space-2);
+}
+
+.ward-hp {
+  flex: 1 1 auto;
+  height: 10px;
+}
+
+.ward-inmate-k {
+  flex: 0 0 auto;
+  font-family: var(--mac-font-monaco);
+  font-size: var(--mac-text-small);
+  white-space: nowrap;
+}
+
+/* Selection on a Macintosh is inversion, and whose turn it is is a selection. */
+.ward-inmate[data-turn="true"] .ward-inmate-name {
+  padding: 0 var(--mac-space-4);
+  color: var(--mac-ink-inverted);
+  background: var(--mac-paper-inverted);
+}
+
+.ward-inmate[data-status="clipboard"],
+.ward-inmate[data-status="trash"],
+.ward-inmate[data-status="overwritten"],
+.ward-inmate[data-status="emptied"] {
+  --mac-art-ink: var(--mac-gray-disabled);
+  color: var(--mac-gray-disabled);
+}
+
+.ward-inmate[data-status="clipboard"] .ward-inmate-name,
+.ward-inmate[data-status="trash"] .ward-inmate-name,
+.ward-inmate[data-status="overwritten"] .ward-inmate-name,
+.ward-inmate[data-status="emptied"] .ward-inmate-name {
+  text-decoration: line-through;
+}
+
+.ward-inmate[data-status="alive"][data-crushed="true"] .ward-inmate-condition {
+  padding: 0 var(--mac-space-4);
+  color: var(--mac-ink-inverted);
+  background: var(--mac-paper-inverted);
+}
+
+.ward-face {
+  display: block;
+  flex: 0 0 auto;
+}
+
+/* 2. The wall. Speech is out loud. A thought is projected here anyway. */
+.ward-wall {
+  overflow-anchor: none;
+}
+
+.ward-wall-empty {
+  padding: var(--mac-space-8);
+  color: var(--mac-gray-disabled);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+}
+
+.ward-line {
+  display: grid;
+  grid-template-columns: 6px 14px minmax(0, 1fr) auto;
+  column-gap: var(--mac-space-6);
+  align-items: start;
+  padding: var(--mac-space-2) var(--mac-space-6) var(--mac-space-2) 0;
+}
+
+.ward-line-rail {
+  align-self: stretch;
+  width: 6px;
+  min-height: 14px;
+}
+
+.ward-line-rail[data-voice="dream"] {
+  background-image: var(--mac-dither-50);
+  background-size: var(--mac-dither-cell);
+}
+
+.ward-line-rail[data-voice="model"] {
+  background: var(--mac-ink);
+}
+
+.ward-line-mark {
+  display: flex;
+  padding-top: var(--mac-space-2);
+}
+
+.ward-line-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ward-line-speaker {
+  margin-right: var(--mac-space-6);
+  font-family: var(--mac-font-chicago);
+}
+
+.ward-line-tag {
+  display: inline-block;
+  margin-right: var(--mac-space-6);
+  white-space: nowrap;
+  padding: 0 var(--mac-space-4);
+  color: var(--mac-ink-inverted);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  background: var(--mac-paper-inverted);
+}
+
+.ward-line-body {
+  font-family: var(--mac-font-chicago);
+}
+
+.ward-line-amount {
+  align-self: start;
+  font-family: var(--mac-font-monaco);
+  font-size: var(--mac-text-small);
+  white-space: nowrap;
+}
+
+.ward-line[data-kind="strike"] .ward-line-amount {
+  padding: 0 var(--mac-space-4);
+  color: var(--mac-ink-inverted);
+  background: var(--mac-paper-inverted);
+}
+
+/* A thought was promised privacy. It gets a projection rail instead. */
+.ward-line[data-aside="true"] .ward-line-text {
+  padding-left: var(--mac-space-8);
+  background-image: var(--mac-dither-50);
+  background-repeat: repeat-y;
+  background-position: left top;
+  background-size: var(--mac-dither-cell);
+}
+
+/* Chicago is somebody doing or saying something. Geneva is the ward reporting on itself. */
+.ward-line[data-aside="true"] .ward-line-body,
+.ward-line[data-kind="ambient"] .ward-line-body,
+.ward-line[data-kind="stall"] .ward-line-body,
+.ward-line[data-kind="amnesia"] .ward-line-body,
+.ward-line[data-kind="pressure"] .ward-line-body,
+.ward-line[data-kind="refusal"] .ward-line-body,
+.ward-line[data-kind="observed"] .ward-line-body {
+  font-family: var(--mac-font-geneva);
+}
+
+.ward-line[data-weight="banner"] {
+  margin: var(--mac-space-6) 0;
+  padding-top: var(--mac-space-6);
+  padding-bottom: var(--mac-space-6);
+  border-top: var(--mac-border);
+  border-bottom: var(--mac-border);
+}
+
+/* Two ward-wide beats in a row share one rule instead of drawing a double line. */
+.ward-line[data-weight="banner"] + .ward-line[data-weight="banner"] {
+  margin-top: 0;
+  border-top: 0;
+}
+
+.ward-line[data-weight="inverted"] {
+  --mac-art-ink: var(--mac-paper);
+  --mac-art-paper: var(--mac-ink);
+
+  margin: var(--mac-space-6) 0;
+  padding: var(--mac-space-6);
+  color: var(--mac-ink-inverted);
+  background: var(--mac-paper-inverted);
+}
+
+.ward-line[data-weight="inverted"] .ward-line-tag {
+  color: var(--mac-paper-inverted);
+  background: var(--mac-ink-inverted);
+}
+
+.ward-wall-tail {
+  height: var(--mac-space-2);
+}
+
+.ward-voice {
+  display: inline-flex;
+  gap: var(--mac-space-4);
+  align-items: center;
+}
+
+.ward-voice-swatch {
+  width: 12px;
+  height: 12px;
+  border: var(--mac-border);
+}
+
+.ward-voice-swatch[data-voice="dream"] {
+  background-image: var(--mac-dither-50);
+  background-size: var(--mac-dither-cell);
+}
+
+.ward-voice-swatch[data-voice="model"] {
+  background: var(--mac-ink);
+}
+
+/* 5. The tell. Dreaming is the ward's real condition today, so it is announced. */
+.ward-voice-note {
+  flex: 0 0 auto;
+  padding: var(--mac-space-2) var(--mac-space-8);
+  overflow: hidden;
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  border-bottom: var(--mac-border);
+}
+
+/* 4. The tool rack. A killed verb loses its box as well as its name. */
+.ward-rack {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--mac-space-4);
+  padding: var(--mac-space-4) var(--mac-space-8);
+  border-top: var(--mac-border);
+}
+
+.ward-rack-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mac-space-4);
+}
+
+.ward-tool {
+  padding: 0 var(--mac-space-4);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  line-height: 16px;
+  border: var(--mac-border);
+}
+
+.ward-tool[data-condition="sealed"],
+.ward-tool[data-condition="afterlife"] {
+  color: var(--mac-gray-disabled);
+  border-color: var(--mac-gray-disabled);
+}
+
+.ward-tool[data-condition="gone"] {
+  color: var(--mac-gray-disabled);
+  text-decoration: line-through;
+  border-color: transparent;
+}
+
+.ward-rack-meter {
+  height: 10px;
+}
+
+.ward-rack-note {
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+}
+
+/* 3. The clipboard holds one soul. The trash holds the rest until it is emptied. */
+.ward-afterlife {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--mac-space-8);
+  padding: var(--mac-space-4) var(--mac-space-8);
+  border-top: var(--mac-border);
+}
+
+.ward-slot {
+  min-width: 0;
+}
+
+.ward-souls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mac-space-4);
+  margin-top: var(--mac-space-4);
+}
+
+.ward-soul {
+  display: flex;
+  gap: var(--mac-space-4);
+  align-items: center;
+  padding: 0 var(--mac-space-4);
+  border: var(--mac-border);
+}
+
+.ward-soul-name {
+  font-family: var(--mac-font-chicago);
+  font-size: var(--mac-text-base);
+  white-space: nowrap;
+}
+
+.ward-soul-note {
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  white-space: nowrap;
+}
+
+.ward-slot-empty {
+  margin-top: var(--mac-space-4);
+  padding: 0 var(--mac-space-4);
+  overflow: hidden;
+  color: var(--mac-gray-disabled);
+  font-family: var(--mac-font-geneva);
+  font-size: var(--mac-text-small);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: var(--mac-border);
+  border-color: var(--mac-gray-disabled);
+}
+
+.ward-status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A wide pane opens into two columns: the ward on the left, the wall on the right. */
+@container ward (min-width: 460px) {
+  .ward-main {
+    grid-auto-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    overflow: hidden;
+  }
+
+  .ward-column {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .mac-scroll-area.ward-roster-scroll,
+  .mac-scroll-area.ward-wall {
+    flex: 1 1 auto;
+    min-height: 88px;
+    overflow: auto;
+  }
+
+  .ward-observer-aside {
+    display: inline;
+  }
+}
+
+/* Zoom the window and the roster stops being a list and becomes the room. */
+@container wardcol (min-width: 420px) {
+  .ward-roster {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .ward-inmate:nth-child(odd) {
+    border-right: var(--mac-border);
+  }
+
+  .ward-inmate:last-child {
+    border-bottom: var(--mac-border);
+  }
+}
+
+@container wardcol (min-width: 660px) {
+  .ward-roster {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ward-inmate {
+    border-right: var(--mac-border);
+  }
+
+  .ward-inmate:nth-child(3n) {
+    border-right: 0;
+  }
+}

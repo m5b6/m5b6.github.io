@@ -20,12 +20,19 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], channel: "chrome" },
     },
   ],
+  /**
+   * A production build, not `next dev`. Dev-mode compilation grew with the desktop and the
+   * ward, and racing it made timing assertions fail for reasons a visitor never sees.
+   * Set PLAYWRIGHT_DEV=1 to drive the dev server while iterating.
+   */
   webServer: hostedBaseUrl
     ? undefined
     : {
-        command: "npm run dev -- --hostname 127.0.0.1",
+        command: process.env.PLAYWRIGHT_DEV
+          ? "npm run dev -- --hostname 127.0.0.1"
+          : "npm run build && npm run start -- --hostname 127.0.0.1",
         url: "http://127.0.0.1:3000/api/canvas",
         reuseExistingServer: true,
-        timeout: 120_000,
+        timeout: 240_000,
       },
 });

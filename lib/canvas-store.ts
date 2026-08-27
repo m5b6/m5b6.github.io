@@ -12,7 +12,7 @@ import {
   type Point,
   type StoredParticipant,
 } from "@/lib/canvas";
-import { runMigrations } from "@/lib/migrations";
+import { ensureSchema } from "@/lib/migrations";
 import { resolveRoomId } from "@/lib/canvas-room";
 import {
   MAX_TRASH_ENTRIES,
@@ -56,7 +56,7 @@ function pool() {
 }
 
 async function initializeSchema() {
-  await runMigrations(pool());
+  await ensureSchema(pool());
   await pool().query(
     "INSERT INTO canvas_meta (room_id) VALUES ($1) ON CONFLICT (room_id) DO NOTHING",
     [roomId],

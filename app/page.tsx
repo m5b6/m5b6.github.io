@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { isbot } from "isbot";
 import { PaintingExperience } from "@/components/painting-experience";
 import { Shell } from "@/components/shell";
+import { wardBoot } from "@/lib/asylum/boot";
 import { isCanvasConfigured } from "@/lib/canvas-store";
 import { shellEnabled } from "@/lib/shell/flags";
 
@@ -20,5 +21,11 @@ export default async function Home() {
     );
   }
 
-  return <Shell initialKind={initialKind} multiplayerEnabled={multiplayerEnabled} />;
+  return (
+    <Shell
+      initialKind={initialKind}
+      multiplayerEnabled={multiplayerEnabled}
+      ward={wardBoot(initialKind)}
+    />
+  );
 }

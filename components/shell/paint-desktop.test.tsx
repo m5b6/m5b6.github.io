@@ -280,12 +280,28 @@ describe("the desktop shell around the canvas", () => {
     expect(icons.getByRole("button", { name: "Trash" })).toBeInTheDocument();
   });
 
-  test("tells you an application that has not opened yet is not open", async () => {
-    await mountDesktop();
+  test("opens each live application's own window from its icon", async () => {
+    const { store } = await mountDesktop();
+
+    expect(store.getWindow("asylum.ward")).toBeNull();
 
     fireEvent.dblClick(iconWell().getByRole("button", { name: "The Asylum" }));
-    expect(
-      await screen.findByRole("alertdialog", { name: "Not open yet" }),
-    ).toHaveTextContent(/has not opened yet/);
+    await waitFor(() => expect(store.getWindow("asylum.ward")).not.toBeNull());
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+
+    fireEvent.dblClick(iconWell().getByRole("button", { name: "Shared Paint" }));
+    await waitFor(() =>
+      expect(store.getWindow("paint.tools")?.focused).toBe(true),
+    );
+  });
+
+  test("stops watching the ward from the Ward menu", async () => {
+    const { store } = await mountDesktop();
+
+    fireEvent.click(menuItem("Watch the Ward"));
+    await waitFor(() => expect(store.getWindow("asylum.ward")).not.toBeNull());
+
+    fireEvent.click(menuItem("Stop Watching"));
+    await waitFor(() => expect(store.getWindow("asylum.ward")).toBeNull());
   });
 });

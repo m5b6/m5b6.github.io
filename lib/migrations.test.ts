@@ -45,10 +45,11 @@ describe("migrations", () => {
   });
 
   it("only ever appends, so an old database is never rewritten", () => {
-    const [first, second, third] = MIGRATIONS;
+    const [first, second, third, fourth] = MIGRATIONS;
     expect(first.sql).toContain("canvas_pixels");
     expect(second.sql).toContain("canvas_rate_limits");
     expect(third.sql).toContain("canvas_trash");
+    expect(fourth.sql).toContain("asylum_ward");
     for (const migration of MIGRATIONS) {
       expect(migration.sql, `migration ${migration.version}`).not.toMatch(
         /DROP\s+TABLE|ALTER\s+TABLE\s+\w+\s+DROP/i,
@@ -61,5 +62,16 @@ describe("migrations", () => {
     expect(trash?.sql).toContain("CREATE TABLE IF NOT EXISTS canvas_trash");
     expect(trash?.sql).toContain("PRIMARY KEY (room_id, revision)");
     expect(trash?.sql).toContain("pixels jsonb NOT NULL");
+  });
+
+  it("gives the ward a home scoped by room, with a bounded event log", () => {
+    const asylum = MIGRATIONS.find(({ version }) => version === 4);
+    expect(asylum?.sql).toContain("CREATE TABLE IF NOT EXISTS asylum_ward");
+    expect(asylum?.sql).toContain("revision bigint NOT NULL DEFAULT 0");
+    expect(asylum?.sql).toContain("CREATE TABLE IF NOT EXISTS asylum_events");
+    expect(asylum?.sql).toContain("PRIMARY KEY (room_id, revision, seq)");
+    expect(asylum?.sql).toContain("CREATE TABLE IF NOT EXISTS asylum_spectators");
+    expect(asylum?.sql).toContain("CREATE TABLE IF NOT EXISTS asylum_spend");
+    expect(asylum?.sql).toContain("PRIMARY KEY (budget_key, window_start)");
   });
 });
