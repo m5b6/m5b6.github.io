@@ -1,6 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
+import { liveAct, liveWhisper } from "@/lib/asylum/live-intent";
 import { dreamAct, dreamRun, dreamWhisper } from "@/lib/asylum/dream";
 import {
   consumeWardLimit,
@@ -95,9 +96,17 @@ export function liveModelsEnabled(
  * dreams, so the intent source is a seam and never a dependency.
  */
 export function resolveWardIntent(
-  _env: { readonly [key: string]: string | undefined } = process.env,
+  env: { readonly [key: string]: string | undefined } = process.env,
 ): WardIntent {
-  return dreamIntent;
+  const apiKey = env.OPENROUTER_API_KEY;
+
+  if (!liveModelsEnabled(env) || !apiKey) return dreamIntent;
+
+  return {
+    source: "model",
+    act: async (state, inmate) => (await liveAct(state, inmate, apiKey)).act,
+    whisper: (state) => liveWhisper(state),
+  };
 }
 
 export function dueTicks(
