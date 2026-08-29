@@ -13,13 +13,19 @@ import { filterText } from "./filter";
 
 const EVERYONE = [...CAST, UNDERSTUDY];
 
+/**
+ * Checked against GET https://openrouter.ai/api/v1/models on 2026-08-29: free, and
+ * advertising tool support. OpenRouter moves models off the free tier without warning, so
+ * this list rots. When it does, an inmate simply dreams instead of speaking; run
+ * `OPENROUTER_LIVE=1 npx vitest run lib/asylum/openrouter.live.test.ts` to find out which.
+ */
 const VERIFIED_FREE_MODELS = [
   "nvidia/nemotron-3-super-120b-a12b:free",
   "google/gemma-4-31b-it:free",
-  "nvidia/nemotron-3-nano-30b-a3b:free",
+  "cohere/north-mini-code:free",
   "google/gemma-4-26b-a4b-it:free",
-  "openai/gpt-oss-20b:free",
-  "nvidia/nemotron-nano-9b-v2:free",
+  "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "liquid/lfm-2.5-2.6b:free",
   "dots-studio/dots-3-note-preview:free",
 ];
 

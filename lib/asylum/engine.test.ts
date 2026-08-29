@@ -320,11 +320,23 @@ describe("the model gate", () => {
     ).toBe(true);
   });
 
-  it("dreams today no matter what the environment says", () => {
+  it("dreams unless production and a key agree", () => {
     expect(resolveWardIntent({}).source).toBe("dream");
+    expect(resolveWardIntent({ OPENROUTER_API_KEY: "sk-x" }).source).toBe("dream");
+    expect(resolveWardIntent({ VERCEL_ENV: "production" }).source).toBe("dream");
+  });
+
+  it("never burns the key from a preview deploy", () => {
+    expect(
+      resolveWardIntent({ VERCEL_ENV: "preview", OPENROUTER_API_KEY: "sk-x" })
+        .source,
+    ).toBe("dream");
+  });
+
+  it("asks a model only in production, with a key", () => {
     expect(
       resolveWardIntent({ VERCEL_ENV: "production", OPENROUTER_API_KEY: "sk-x" })
         .source,
-    ).toBe("dream");
+    ).toBe("model");
   });
 });
