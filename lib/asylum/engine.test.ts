@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
   DORMANT_AFTER_MS,
@@ -331,6 +332,16 @@ describe("the model gate", () => {
       resolveWardIntent({ VERCEL_ENV: "preview", OPENROUTER_API_KEY: "sk-x" })
         .source,
     ).toBe("dream");
+  });
+
+  it("is actually reached: the tick path resolves an intent rather than always dreaming", async () => {
+    const source = readFileSync(
+      new URL("./engine.ts", import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain("options.intent ?? resolveWardIntent()");
+    expect(source).not.toContain("options.intent ?? dreamIntent");
   });
 
   it("asks a model only in production, with a key", () => {

@@ -135,7 +135,7 @@ export async function runWardTicks(
   state: WardState,
   options: { ticks: number; observers: number; intent?: WardIntent },
 ): Promise<WardResult> {
-  const intent = options.intent ?? dreamIntent;
+  const intent = options.intent ?? resolveWardIntent();
   const observers = Math.max(0, Math.trunc(options.observers));
   const ticks = Math.max(0, Math.trunc(options.ticks));
   const events: WardEvent[] = [];
